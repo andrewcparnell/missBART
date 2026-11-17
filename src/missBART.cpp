@@ -220,7 +220,8 @@ public:
       if (valid) {
         const double ratio =
           (tree_prior(nodes1) + tree_loglik(nodes1, S1, cnt1, U, lam, kUmu0, leaf_const)) -
-          (tree_prior(tr.nodes) + tree_loglik(tr.nodes, S0, cnt0, U, lam, kUmu0, leaf_const));
+          (tree_prior(tr.nodes) + tree_loglik(tr.nodes, S0, cnt0, U, lam, kUmu0, leaf_const)) +
+          log_hastings(tr.nodes, nodes1, move);
         if (ratio >= 0.0 || -exp_rand() <= ratio) {
           tr.nodes.swap(nodes1);
           tr.leaf.swap(leaf1);
@@ -350,6 +351,41 @@ private:
       ll += leaf_loglik(cnt[l], S.colptr(l), p, kappa, U, lam, kUmu0) + leaf_const;
     }
     return ll;
+  }
+
+  // Probability of proposing each type of move from a given tree.
+  static double move_prob(const std::vector<Node>& nd, int move) {
+    if (nd.size() == 1) return move == 0 ? 1.0 : 0.0;
+    return move == 2 ? 4.0 / 9.0 : 2.5 / 9.0;
+  }
+
+  static int n_leaves(const std::vector<Node>& nd) {
+    int k = 0;
+    for (std::size_t i = 0; i < nd.size(); ++i) if (nd[i].left < 0) ++k;
+    return k;
+  }
+
+  // Internal nodes whose two children are both terminal.
+  static int n_prunable(const std::vector<Node>& nd) {
+    int k = 0;
+    for (std::size_t i = 0; i < nd.size(); ++i) {
+      const int c = nd[i].left;
+      if (c >= 0 && nd[c].left < 0 && nd[c + 1].left < 0) ++k;
+    }
+    return k;
+  }
+
+  // Log of q(new -> old) / q(old -> new). A grow move picks one of the terminal
+  // nodes and is reversed by pruning one of the prunable nodes of the new tree,
+  // and vice versa. The splitting rule is proposed from its prior, so its
+  // density cancels against the prior and does not appear, and a change move
+  // contributes nothing.
+  static double log_hastings(const std::vector<Node>& old_nd, const std::vector<Node>& new_nd, int move) {
+    if (move == 0)
+      return std::log(move_prob(new_nd, 1) / n_prunable(new_nd)) - std::log(move_prob(old_nd, 0) / n_leaves(old_nd));
+    if (move == 1)
+      return std::log(move_prob(new_nd, 0) / n_leaves(new_nd)) - std::log(move_prob(old_nd, 1) / n_prunable(old_nd));
+    return 0.0;
   }
 
   // Interval of variable v still available at `node`, given the splitting
@@ -525,6 +561,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
   const int min_node = ctrl["min_node"], max_attempt = ctrl["max_attempt"];
   const bool include_x = ctrl["include_x"], include_y = ctrl["include_y"];
   const bool conditional = ctrl["conditional"];
+  const arma::vec z_offset = as<arma::vec>(ctrl["z_offset"]);
   const double mh_sd = ctrl["MH_sd"];
   const arma::vec y_min = as<arma::vec>(ctrl["y_min"]), y_rng = as<arma::vec>(ctrl["y_rng"]);
   const double a0 = ctrl["a0"], b0 = ctrl["b0"], ax = ctrl["ax"], bx = ctrl["bx"],
@@ -582,7 +619,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
   arma::mat Zd, Zc;                 // design matrices of the two models
   arma::mat B, Rm, Zl;              // model 1: coefficients, correlation, latent (n x p)
   arma::vec tau;
-  arma::mat Zt;                     // model 2: latent, p x n
+  arma::mat Zt, Zc_target;          // model 2: latent, p x n, and latent minus offset
   const arma::mat Ip = arma::eye(p, p);
   const arma::vec ones_p = arma::ones(p);
   Forest* cls = 0;
@@ -600,7 +637,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
     if (qx > 0) tau.subvec(1, qx).fill(R::rgamma(0.5 * p * qx + ax, 1.0 / bx));
     if (py > 0) tau.subvec(1 + qx, r1 - 1).fill(R::rgamma(0.5 * p * py + ay, 1.0 / by));
     Zl.set_size(n, p);
-    for (int j = 0; j < p; ++j) for (int i = 0; i < n; ++i) Zl(i, j) = m(i, j) == 0 ? -1.0 : 1.0;
+    for (int j = 0; j < p; ++j) for (int i = 0; i < n; ++i) Zl(i, j) = m(i, j) == 0 ? 1.0 : -1.0;
   } else if (model == 2) {
     Zc.set_size(n, r2);
     if (include_x) Zc.cols(0, q - 1) = x;
@@ -612,7 +649,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
     cls->row_ok.assign(n, 1);
     for (int i = 0; i < n; ++i) if (!row_mis[i].empty()) cls->row_ok[i] = 0;
     Zt.set_size(p, n);
-    for (int j = 0; j < p; ++j) for (int i = 0; i < n; ++i) Zt(j, i) = m(i, j) == 0 ? -1.0 : 1.0;
+    for (int j = 0; j < p; ++j) for (int i = 0; i < n; ++i) Zt(j, i) = m(i, j) == 0 ? 1.0 : -1.0;
   }
 
   // ----- storage -----
@@ -672,7 +709,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
       // 4. latent probit variables
       const arma::mat Mu = Zd * B;
       if (p == 1) {
-        for (int i = 0; i < n; ++i) Zl(i, 0) = rtn_sign(Mu(i, 0), 1.0, m(i, 0) == 1);
+        for (int i = 0; i < n; ++i) Zl(i, 0) = rtn_sign(Mu(i, 0), 1.0, m(i, 0) == 0);
       } else {
         const arma::mat P = safe_inv(Rm);
         for (int i = 0; i < n; ++i) {
@@ -680,7 +717,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
             double acc = 0.0;
             for (int k = 0; k < p; ++k) if (k != j) acc += P(j, k) * (Zl(i, k) - Mu(i, k));
             const double cm = Mu(i, j) - acc / P(j, j);
-            Zl(i, j) = rtn_sign(cm, 1.0 / std::sqrt(P(j, j)), m(i, j) == 1);
+            Zl(i, j) = rtn_sign(cm, 1.0 / std::sqrt(P(j, j)), m(i, j) == 0);
           }
         }
       }
@@ -736,9 +773,11 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
     } else if (model == 2) {
       // 4. missingness trees, then the latent probit variables
       cls->update_ranges();
-      cls->sweep(Zt, Ip, ones_p);
+      Zc_target = Zt;
+      Zc_target.each_col() -= z_offset;
+      cls->sweep(Zc_target, Ip, ones_p);
       for (int i = 0; i < n; ++i)
-        for (int j = 0; j < p; ++j) Zt(j, i) = rtn_sign(cls->fit(j, i), 1.0, m(i, j) == 1);
+        for (int j = 0; j < p; ++j) Zt(j, i) = rtn_sign(z_offset[j] + cls->fit(j, i), 1.0, m(i, j) == 0);
 
       // 5. missing responses
       if (n_mis > 0) {
@@ -752,7 +791,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
             cls->row_fit(xrow.memptr(), zprop, leaves);
             double l1 = 0.0, l2 = 0.0;
             for (int j = 0; j < p; ++j) {
-              const double d1 = Zt(j, i) - cls->fit(j, i), d2 = Zt(j, i) - zprop[j];
+              const double d1 = Zt(j, i) - z_offset[j] - cls->fit(j, i), d2 = Zt(j, i) - z_offset[j] - zprop[j];
               l1 += d1 * d1;
               l2 += d2 * d2;
             }
@@ -820,7 +859,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
             for (int g = 0; g < G; ++g) {
               xrow[ycol0] = pdp_grid[g];
               cls->row_fit(xrow.memptr(), zprop, leaves);
-              pd(i, g) = zprop[0];
+              pd(i, g) = z_offset[0] + zprop[0];
             }
           }
           pdp_out[s] = pd;

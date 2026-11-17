@@ -54,8 +54,8 @@ test_that("missBART2 returns a well-formed fit", {
   expect_error(predict(fit), "x_predict")
   expect_error(coef(fit))
   expect_equal(dim(fit$z_post[[1]]), dim(d$y))
-  # the latent variables agree in sign with the missingness indicators
-  expect_true(all((fit$z_post[[100]] > 0) == !is.na(d$y)))
+  # the latent variables are positive exactly for the missing responses
+  expect_true(all((fit$z_post[[100]] > 0) == is.na(d$y)))
   expect_lt(sqrt(mean((fitted(fit) - d$f)^2)), 1)
 })
 
@@ -89,6 +89,7 @@ test_that("univariate responses and partial dependence work", {
   expect_equal(dim(f1$B_post[[1]]), c(5, 1))
   f2 <- run(missBART2, d$x, d$y, n_reg_trees = 10, n_class_trees = 5, burn = 50, iters = 50, make_pdp = TRUE)
   expect_equal(dim(f2$pdp_out[[1]]), c(nrow(d$x), 20))
+  expect_equal(range(f2$pdp_grid), range(d$y, na.rm = TRUE))
   f3 <- run(missBART2, d$x, d$y, n_reg_trees = 10, n_class_trees = 5, burn = 50, iters = 50,
             make_pdp = TRUE, include_x = FALSE)
   expect_equal(dim(f3$pdp_out[[1]]), c(1, 50))
@@ -136,9 +137,11 @@ test_that("simulation helpers run", {
   data <- sim_data_trees(n = 200, p = 2, q = 3, trees = 3)
   expect_equal(dim(data$y), c(200, 2))
   miss <- sim_missing_probit(data$x, data$y, include_x = TRUE, include_y = TRUE,
-                             min_missing_prop = 0.3, max_missing_prop = 0.95)
+                             min_missing_prop = 0.05, max_missing_prop = 0.7)
   expect_equal(dim(miss$m), c(200, 2))
-  miss2 <- sim_missing_trees(data$x, data$y, min_missing_prop = 0.2, max_missing_prop = 0.98)
+  expect_equal(miss$m == 1, is.na(miss$missing_y))
+  expect_equal(unname(miss$missing_prop), unname(colMeans(is.na(miss$missing_y))))
+  miss2 <- sim_missing_trees(data$x, data$y, min_missing_prop = 0.02, max_missing_prop = 0.8)
   expect_equal(dim(miss2$m), c(200, 2))
 })
 
@@ -152,7 +155,7 @@ test_that("the multivariate probit regression recovers known coefficients and co
   xs <- sweep(sweep(x, 2, apply(x, 2, min)), 2, apply(x, 2, max) - apply(x, 2, min), "/") - 0.5
   z <- cbind(1, xs) %*% B + matrix(rnorm(2 * n), ncol = 2) %*% chol(R)
   y <- cbind(x[, 1], x[, 2]) + matrix(rnorm(2 * n, sd = 0.1), ncol = 2)
-  y[z <= 0] <- NA
+  y[z > 0] <- NA                                           # positive latent variable = missing
   # the responses are not predictors here, so the probit part is an ordinary multivariate probit regression
   fit <- missBART1(x, y, n_trees = 10, burn = 1000, iters = 2000, thin = 1, include_y = FALSE,
                    mice_impute = FALSE, show_progress = FALSE, save_y_pred = FALSE, save_z = FALSE)
@@ -162,4 +165,34 @@ test_that("the multivariate probit regression recovers known coefficients and co
   r12 <- sapply(fit$R_post, function(a) a[1, 2])
   expect_equal(mean(r12), 0.6, tolerance = 0.15)
   expect_true(all(is.finite(unlist(fit$y_impute))))
+})
+
+test_that("the scaling options give equivalent fits and return results on the data scale", {
+  d <- sim(n = 120)
+  y <- 50 + 10 * d$y
+  fits <- lapply(list("center", "range", "none", TRUE, FALSE), function(sc) {
+    set.seed(3)
+    run(missBART1, d$x, y, n_trees = 20, burn = 150, iters = 150, scale = sc)
+  })
+  expect_equal(sapply(fits, function(f) f$scale), c("center", "range", "none", "range", "none"))
+  expect_identical(fits[[2]]$y_post, fits[[4]]$y_post)
+  expect_equal(unname(fits[[1]]$center_y), unname(colMeans(y, na.rm = TRUE)))
+  obs <- !is.na(y)
+  for(f in fits[1:2]) {
+    expect_lt(sqrt(mean((fitted(f)[obs] - y[obs])^2)), 6)
+    expect_true(all(abs(imputed_values(f)$mean - 50) < 100))
+  }
+  expect_error(missBART1(d$x, y, scale = "other"))
+})
+
+test_that("coefficients are positive when large values are more likely to be missing", {
+  set.seed(21)
+  n <- 600
+  x <- matrix(runif(n * 2), ncol = 2)
+  y_true <- 3 * x[, 1] + rnorm(n, sd = 0.5)
+  y <- y_true
+  y[runif(n) < pnorm(-0.5 + 1.5 * scale(y_true))] <- NA
+  fit <- run(missBART1, x, y, n_trees = 20, burn = 500, iters = 500, include_x = FALSE)
+  expect_gt(coef(fit)["Y1", 1, "lower"], 0)
+  expect_gt(mean(imputed_values(fit)$mean), mean(y, na.rm = TRUE))
 })

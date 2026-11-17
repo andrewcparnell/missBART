@@ -31,5 +31,5 @@ One sample from that distribution
 
 ``` r
 rMVNc(c(0,0), diag(2))
-#> [1]  0.5072338 -2.2851232
+#> [1] 0.2121665 0.7099192
 ```

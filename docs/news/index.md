@@ -21,6 +21,33 @@
 
 These change the results relative to version 0.1.0.
 
+- **Missingness indicator.** The models are now written with `M = 1` for
+  a missing response, and the latent probit variable is positive for
+  missing responses. The probit coefficients of
+  [`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+  (`B_post`, [`coef()`](https://rdrr.io/r/stats/coef.html)) and the
+  latent variables (`z_post`, `pdp_out`) therefore have the opposite
+  sign to version 0.1.0: a positive coefficient now means that larger
+  values make the response more likely to be *missing*.
+  [`sim_missing_probit()`](https://andrewcparnell.github.io/missBART/reference/sim_missing_probit.md)
+  and
+  [`sim_missing_trees()`](https://andrewcparnell.github.io/missBART/reference/sim_missing_trees.md)
+  use the same coding (their `m` is 1 for missing), and their
+  `min_missing_prop` and `max_missing_prop` arguments now really bound
+  the proportion missing (defaults 0.1 and 0.4).
+- **Standardisation of the responses.** The new default
+  `scale = "center"` follows the `BART` package (Sparapani, Spanbauer
+  and McCulloch, 2021): each response has an offset equal to the mean of
+  its observed values, and the terminal node parameters are centred at
+  zero with a standard deviation proportional to the range of the
+  response. `scale = "range"` (or `TRUE`) gives the `[-0.5, 0.5]`
+  scaling of version 0.1.0, and `scale = "none"` (or `FALSE`) no
+  scaling. The probit BART model of
+  [`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+  has an offset equal to the probit of the proportion of missing values.
+- **Proposal ratio.** The Metropolis-Hastings step for the trees now
+  includes the proposal ratio of the grow and prune moves. Version 0.1.0
+  accepted on the ratio of prior times likelihood alone.
 - **Missing responses in partly observed rows.** The Gaussian update of
   the missing responses
   ([`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md),
@@ -87,7 +114,8 @@ These change the results relative to version 0.1.0.
   - `omega_post` (also available as `sigma_post`) always holds full
     residual covariance matrices on the original scale. It used to hold
     only the variances when `scale = TRUE` and there was more than one
-    response.
+    response. (This is issue
+    [\#1](https://github.com/yongchengoh/missBART/issues/1) on GitHub.)
   - `new_y_hat` is new and holds the BART mean function at `x_predict`;
     `new_y_post` holds posterior predictive draws, as before.
   - `var_imp` is a matrix of split counts (iterations by predictors)
@@ -96,6 +124,9 @@ These change the results relative to version 0.1.0.
   - `y_miss_accept` holds one acceptance rate per missing value rather
     than an iterations-by-values matrix.
   - `tau_b` no longer has a leading row of `NA`.
+  - `pdp_range` is given on the scale of the data (it used to be on the
+    `[-0.5, 0.5]` scale) and defaults to the observed range; the grid is
+    returned as `pdp_grid`.
   - `pdp_out`
     ([`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md),
     univariate response) has one element per kept iteration, and no

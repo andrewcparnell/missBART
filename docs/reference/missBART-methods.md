@@ -54,4 +54,5 @@ posterior mean of the BART mean function for the training rows and
 of the probit coefficients of a
 [`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
 fit together with their posterior intervals (an array with one slice per
-summary).
+summary). A positive coefficient means that larger values of the
+predictor make the response more likely to be missing.

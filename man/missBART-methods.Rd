@@ -35,7 +35,9 @@
 the training rows and \code{predict()} the same at the \code{x_predict} supplied
 when fitting. \code{coef()} returns the posterior mean of the probit
 coefficients of a \code{missBART1()} fit together with their posterior
-intervals (an array with one slice per summary).
+intervals (an array with one slice per summary). A positive coefficient
+means that larger values of the predictor make the response more likely
+to be missing.
 }
 \description{
 Methods for missBART fits

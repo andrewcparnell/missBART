@@ -114,7 +114,7 @@ sim_data_trees <- function(n, p, q, min_x = 0, max_x = 1, trees = 1, ome = NULL,
 #' @return A list with the following components
 #' \describe{
 #' \item{B}{probit coefficients}
-#' \item{m}{missingness indicators}
+#' \item{m}{missingness indicators: 1 for missing, 0 for observed}
 #' \item{missing_y}{inputted y with missing values deleted}
 #' \item{missing_prop}{proportion of missingness per response variable}
 #' \item{missing_index}{indices of missing cells in \code{missing_y}}
@@ -129,7 +129,7 @@ sim_data_trees <- function(n, p, q, min_x = 0, max_x = 1, trees = 1, ome = NULL,
 #' # missing <- sim_missing_probit(x = data$x, y = data$y, include_x = TRUE,
 #' #                               include_y = TRUE, max_missing_prop = 0.99,
 #' #                               min_node = 10, min_missing_prop = 0.7, intercept = TRUE)
-sim_missing_probit <- function(x, y, include_x = FALSE, include_y = FALSE, min_missing_prop = 0.6, max_missing_prop = 0.9, ...) {
+sim_missing_probit <- function(x, y, include_x = FALSE, include_y = FALSE, min_missing_prop = 0.1, max_missing_prop = 0.4, ...) {
   p <- ncol(y)
   q <- ncol(x)
   n <- nrow(y)
@@ -164,14 +164,14 @@ sim_missing_probit <- function(x, y, include_x = FALSE, include_y = FALSE, min_m
       phi <- matrix(B, nrow = n, ncol = p, byrow = TRUE)
     }
     z_mod <- multi_rMVN(phi, solve(corR))
-    m <- matrix(1, nrow=n, ncol=p)
-    m[z_mod <= 0] <- 0
+    m <- matrix(0, nrow=n, ncol=p)
+    m[z_mod > 0] <- 1
 
     mis_prop <- colMeans(m)
     if(all(mis_prop > min_missing_prop) & all(mis_prop < max_missing_prop)) break
   }
 
-  y[m == 0] <- NA
+  y[m == 1] <- NA
   missing_prop <- colMeans(m)
   missing_index <- which(is.na(y))
   obs_index <- which(!is.na(y))
@@ -192,7 +192,7 @@ sim_missing_probit <- function(x, y, include_x = FALSE, include_y = FALSE, min_m
 #'
 #' @return A list with the following components
 #' \describe{
-#' \item{m}{missingness indicators}
+#' \item{m}{missingness indicators: 1 for missing, 0 for observed}
 #' \item{missing_y}{inputted y with missing values deleted}
 #' \item{missing_prop}{proportion of missingness per response variable}
 #' \item{missing_index}{indices of missing cells in \code{missing_y}}
@@ -207,7 +207,7 @@ sim_missing_probit <- function(x, y, include_x = FALSE, include_y = FALSE, min_m
 #' # missing <- sim_missing_trees(x = data$x, y = data$y, include_x = FALSE,
 #' #                              include_y = TRUE, max_missing_prop = 0.99,
 #' #                              min_node = 5, min_missing_prop = 0.7, trees = 1)
-sim_missing_trees <- function(x, y, trees = 1, include_x = FALSE, include_y = TRUE, min_missing_prop = 0.6, max_missing_prop = 0.9, ...) {
+sim_missing_trees <- function(x, y, trees = 1, include_x = FALSE, include_y = TRUE, min_missing_prop = 0.1, max_missing_prop = 0.4, ...) {
   p <- ncol(y)
   q <- ncol(x)
   n <- nrow(x)
@@ -249,14 +249,14 @@ sim_missing_trees <- function(x, y, trees = 1, include_x = FALSE, include_y = TR
       sum_mu <- sum_mu + mu[new_tree$change_points,, drop=FALSE]
     }
     z_mod <- multi_rMVN(mean_mat = sum_mu, precision = diag(p))
-    m <- matrix(1, nrow=n, ncol=p)
-    m[z_mod <= 0] <- 0
+    m <- matrix(0, nrow=n, ncol=p)
+    m[z_mod > 0] <- 1
     mis_prop <- colMeans(m)
 
     if(all(mis_prop > min_missing_prop) & all(mis_prop < max_missing_prop)) break
   }
 
-  y[m == 0] <- NA
+  y[m == 1] <- NA
   missing_prop <- colMeans(m)
   missing_index <- which(is.na(y))
   obs_index <- which(!is.na(y))

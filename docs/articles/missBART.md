@@ -64,7 +64,7 @@ fit1
 #> missBART1 fit: 400 observations, 2 responses
 #> Missing responses: 200 of 800 (25%)
 #> Posterior samples: 500 (burn-in 500, thinning 1)
-#> Tree acceptance rate: regression 0.064
+#> Tree acceptance rate: regression 0.087
 ```
 
 [`imputed_values()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md)
@@ -76,12 +76,12 @@ fills in their posterior means.
 imp1 <- imputed_values(fit1)
 head(imp1)
 #>   row column     mean       sd    lower    upper
-#> 1   1     Y1 16.87980 1.116259 14.65301 18.92342
-#> 2  12     Y1 20.41151 1.201302 18.31049 22.90787
-#> 3  23     Y1 22.26150 1.047592 20.32101 24.18174
-#> 4  26     Y1 18.72594 1.056467 16.77357 20.83999
-#> 5  35     Y1 21.33113 1.034022 19.36545 23.38867
-#> 6  36     Y1 19.70692 1.323509 16.98855 22.24528
+#> 1   1     Y1 15.85965 1.105576 13.69506 18.07238
+#> 2  12     Y1 21.83528 1.047334 19.81081 23.87049
+#> 3  23     Y1 22.69528 1.075083 20.80349 24.86201
+#> 4  26     Y1 17.82940 1.080126 15.62825 20.11384
+#> 5  35     Y1 20.57692 1.275867 18.12664 23.08140
+#> 6  36     Y1 20.37656 1.091618 18.29674 22.58855
 truth <- y_true[fit1$missing_index]
 plot(truth, imp1$mean, xlab = "True value", ylab = "Posterior mean imputation",
      col = factor(imp1$column), pch = 19, cex = 0.6)
@@ -92,48 +92,48 @@ abline(0, 1)
 
 The probit coefficients describe the missingness mechanism. Each column
 refers to the missingness of one response, and a positive coefficient
-makes that response more likely to be *observed*. Posterior intervals
-for the rows `Y1` and `Y2` that exclude zero indicate MNAR data. (With
-`scale = TRUE` the coefficients refer to covariates and responses scaled
-to `[-0.5, 0.5]`.)
+makes that response more likely to be *missing*. Posterior intervals for
+the rows `Y1` and `Y2` that exclude zero indicate MNAR data. (The
+coefficients refer to standardised covariates and responses; see
+[`?missBART1`](https://andrewcparnell.github.io/missBART/reference/missBART.md).)
 
 ``` r
 round(coef(fit1), 2)
 #> , , mean
 #> 
 #>              Y1    Y2
-#> Intercept  1.81  1.48
-#> X1         0.59 -0.45
-#> X2        -0.50  1.22
-#> X3         0.49 -0.59
-#> X4         0.35  0.26
-#> X5         0.00  0.33
-#> Y1        -5.51 -0.62
-#> Y2        -1.55 -3.53
+#> Intercept -1.71 -1.55
+#> X1        -0.72  0.04
+#> X2         0.54 -0.44
+#> X3        -0.48  0.31
+#> X4        -0.35 -0.09
+#> X5         0.08 -0.28
+#> Y1         5.51  0.47
+#> Y2         1.62  5.28
 #> 
 #> , , lower
 #> 
 #>              Y1    Y2
-#> Intercept  1.43  1.08
-#> X1        -0.24 -1.39
-#> X2        -1.70 -0.09
-#> X3        -0.17 -1.25
-#> X4        -0.48 -0.52
-#> X5        -0.63 -0.28
-#> Y1        -7.20 -1.93
-#> Y2        -3.23 -6.08
+#> Intercept -2.08 -1.98
+#> X1        -1.61 -1.15
+#> X2        -0.73 -1.88
+#> X3        -1.14 -0.39
+#> X4        -1.18 -0.97
+#> X5        -0.52 -0.95
+#> Y1         3.96 -0.78
+#> Y2        -0.12  2.71
 #> 
 #> , , upper
 #> 
 #>              Y1    Y2
-#> Intercept  2.24  1.97
-#> X1         1.52  0.41
-#> X2         0.69  2.76
-#> X3         1.17  0.15
-#> X4         1.19  1.17
-#> X5         0.56  0.98
-#> Y1        -3.90  0.61
-#> Y2         0.16 -1.05
+#> Intercept -1.37 -1.19
+#> X1         0.16  0.99
+#> X2         1.97  0.92
+#> X3         0.14  1.00
+#> X4         0.48  0.72
+#> X5         0.71  0.38
+#> Y1         7.12  1.87
+#> Y2         3.57  7.84
 ```
 
 ## missBART2: probit BART for the missingness
@@ -145,8 +145,8 @@ fit2
 #> missBART2 fit: 400 observations, 2 responses
 #> Missing responses: 200 of 800 (25%)
 #> Posterior samples: 500 (burn-in 500, thinning 1)
-#> Tree acceptance rate: regression 0.065, missingness 0.131
-#> Acceptance rate for missing responses: 0.2
+#> Tree acceptance rate: regression 0.089, missingness 0.197
+#> Acceptance rate for missing responses: 0.19
 ```
 
 There are no coefficients to inspect here. Instead,
@@ -178,7 +178,7 @@ c(complete_cases = rmse(pred0[fit1$missing_index], truth),
   missBART1 = rmse(imp1$mean, truth),
   missBART2 = rmse(imputed_values(fit2)$mean, truth))
 #> complete_cases      missBART1      missBART2 
-#>       1.491053       1.124269       1.188220
+#>       1.666967       1.153195       1.132137
 ```
 
 ## What is in a fit
@@ -195,6 +195,6 @@ mean function and predictive draws for new covariates.
 ``` r
 round(Reduce("+", fit1$sigma_post) / length(fit1$sigma_post), 2)
 #>      Y1   Y2
-#> Y1 1.09 0.41
-#> Y2 0.41 0.83
+#> Y1 0.92 0.34
+#> Y2 0.34 0.78
 ```

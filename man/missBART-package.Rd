@@ -12,6 +12,7 @@ Goh, Soh, Parnell and Murphy (2024) \url{doi:10.48550/arXiv.2412.14946}.
 Useful links:
 \itemize{
   \item \url{https://github.com/yongchengoh/missBART}
+  \item \url{https://andrewcparnell.github.io/missBART/}
   \item Report bugs at \url{https://github.com/yongchengoh/missBART/issues}
 }
 

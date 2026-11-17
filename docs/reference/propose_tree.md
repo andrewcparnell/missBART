@@ -67,10 +67,10 @@ df[1,] <- c(0,0,1,0,1,0,0, NA)
 x <- matrix(stats::runif(9), ncol=3)
 propose_tree(df, x, min_node = 1, max_attempt = 1, i = 1)
 #> $new_df
-#>   parent     lower     upper split_variable split_value depth direction
-#> 1      0 0.0000000 1.0000000              0   1.0000000     0         0
-#> 2      1 0.1260272 0.4959064              3   0.4675873     1         0
-#> 3      1 0.1260272 0.4959064              3   0.4675873     1         1
+#>   parent     lower    upper split_variable split_value depth direction
+#> 1      0 0.0000000 1.000000              0     1.00000     0         0
+#> 2      1 0.1010004 0.925852              3     0.90471     1         0
+#> 3      1 0.1010004 0.925852              3     0.90471     1         1
 #>   NA_direction
 #> 1           NA
 #> 2           NA
@@ -80,7 +80,7 @@ propose_tree(df, x, min_node = 1, max_attempt = 1, i = 1)
 #> [1] "GROW"
 #> 
 #> $change_points
-#> [1] 1 1 2
+#> [1] 2 1 1
 #> 
 #> $decent_tree
 #> [1] TRUE

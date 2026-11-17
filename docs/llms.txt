@@ -58,7 +58,7 @@ fit2 <- missBART2(x, y, n_class_trees = 20)  # probit BART missingness model
 fit1
 head(imputed_values(fit1))   # posterior summaries of the missing responses
 y_complete <- completed_data(fit1)
-coef(fit1)                   # probit coefficients: is the missingness driven by y?
+coef(fit1)                   # probit coefficients: positive = more likely to be missing
 varimp(fit2)                 # which predictors the missingness trees split on
 ```
 
@@ -100,8 +100,8 @@ data set (`n = 500`, two responses) gave:
 
 | model     | time 0.1.0 | time 0.2.0 | imputation RMSE 0.1.0 | imputation RMSE 0.2.0 |
 |-----------|-----------:|-----------:|----------------------:|----------------------:|
-| missBART1 |      621 s |      2.0 s |                  1.24 |                  1.15 |
-| missBART2 |      246 s |      1.8 s |                  1.16 |                  1.15 |
+| missBART1 |      621 s |      1.7 s |                  1.24 |                  1.17 |
+| missBART2 |      246 s |      1.5 s |                  1.16 |                  1.11 |
 | mvBART    |      196 s |      1.1 s |                     – |                     – |
 
 The two versions do not produce identical draws for the same seed, and a

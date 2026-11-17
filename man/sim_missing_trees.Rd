@@ -10,8 +10,8 @@ sim_missing_trees(
   trees = 1,
   include_x = FALSE,
   include_y = TRUE,
-  min_missing_prop = 0.6,
-  max_missing_prop = 0.9,
+  min_missing_prop = 0.1,
+  max_missing_prop = 0.4,
   ...
 )
 }
@@ -35,7 +35,7 @@ sim_missing_trees(
 \value{
 A list with the following components
 \describe{
-\item{m}{missingness indicators}
+\item{m}{missingness indicators: 1 for missing, 0 for observed}
 \item{missing_y}{inputted y with missing values deleted}
 \item{missing_prop}{proportion of missingness per response variable}
 \item{missing_index}{indices of missing cells in \code{missing_y}}

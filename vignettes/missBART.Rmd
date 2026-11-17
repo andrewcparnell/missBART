@@ -82,9 +82,9 @@ abline(0, 1)
 
 The probit coefficients describe the missingness mechanism. Each column refers
 to the missingness of one response, and a positive coefficient makes that
-response more likely to be *observed*. Posterior intervals for the rows `Y1`
-and `Y2` that exclude zero indicate MNAR data. (With `scale = TRUE` the
-coefficients refer to covariates and responses scaled to `[-0.5, 0.5]`.)
+response more likely to be *missing*. Posterior intervals for the rows `Y1`
+and `Y2` that exclude zero indicate MNAR data. (The coefficients refer to
+standardised covariates and responses; see `?missBART1`.)
 
 ```{r}
 round(coef(fit1), 2)

@@ -22,12 +22,12 @@ missBART1(
   predict = TRUE,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   include_x = TRUE,
   include_y = TRUE,
   show_progress = TRUE,
   progress_every = 10,
-  pdp_range = c(-0.5, 0.5),
+  pdp_range = NULL,
   make_pdp = FALSE,
   mice_impute = TRUE,
   ymis_update = c("conditional", "marginal"),
@@ -48,12 +48,12 @@ missBARTprobit(
   predict = TRUE,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   include_x = TRUE,
   include_y = TRUE,
   show_progress = TRUE,
   progress_every = 10,
-  pdp_range = c(-0.5, 0.5),
+  pdp_range = NULL,
   make_pdp = FALSE,
   mice_impute = TRUE,
   ymis_update = c("conditional", "marginal"),
@@ -76,12 +76,12 @@ missBART2(
   MH_sd = NULL,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   include_x = TRUE,
   include_y = TRUE,
   show_progress = TRUE,
   progress_every = 10,
-  pdp_range = c(-0.5, 0.5),
+  pdp_range = NULL,
   make_pdp = FALSE,
   mice_impute = TRUE,
   ymis_update = c("conditional", "marginal"),
@@ -141,10 +141,14 @@ missBART2(
 
 - scale:
 
-  logical. Scale each response to `[-0.5, 0.5]` before fitting?
-  `missBART1()` then also scales the covariates, so `B_post` refers to
-  the scaled variables. Everything else is returned on the original
-  scale.
+  how the responses are standardised before fitting; see Details.
+  `"center"` (the default) subtracts the mean of the observed values of
+  each response and divides by their range, `"range"` (or `TRUE`) maps
+  each response to `[-0.5, 0.5]` as in Chipman et al. (2010) and
+  versions before 0.2.0, and `"none"` (or `FALSE`) leaves them alone.
+  Unless `scale = "none"`, `missBART1()` also scales the covariates to
+  `[-0.5, 0.5]`, so `B_post` refers to standardised variables.
+  Everything else is returned on the original scale.
 
 - include_x, include_y:
 
@@ -162,12 +166,13 @@ missBART2(
 - pdp_range, make_pdp:
 
   for `missBART2()` with a univariate response: if `make_pdp = TRUE`,
-  the latent missingness predictor is evaluated over a grid of (scaled)
-  response values spanning `pdp_range` at every kept iteration and
-  returned in `pdp_out`; apply
+  the latent missingness predictor is evaluated over a grid of response
+  values spanning `pdp_range` (on the scale of the data; the default is
+  the observed range) at every kept iteration and returned in `pdp_out`,
+  with the grid in `pdp_grid`; apply
   [`stats::pnorm()`](https://rdrr.io/r/stats/Normal.html) to get the
-  probability of being observed. Ignored by `missBART1()`, where the
-  same curves follow directly from `B_post`.
+  probability of being missing. Ignored by `missBART1()`, where the same
+  curves follow directly from `B_post`.
 
 - mice_impute:
 
@@ -261,7 +266,7 @@ An object of class `"missBART"`: a list with, among others,
 
 - z_post:
 
-  list of latent probit variables.
+  list of latent probit variables (positive for missing responses).
 
 - y_miss_accept:
 
@@ -282,7 +287,43 @@ and
 [`varimp()`](https://andrewcparnell.github.io/missBART/reference/varimp.md)
 to summarise a fit.
 
+## Details
+
+**Missingness indicator.** Write \\M\_{ij} = 1\\ if response \\j\\ of
+observation \\i\\ is missing and 0 if it is observed. Both models use a
+latent variable \\M^\*\_{ij}\\ that is positive exactly when \\M\_{ij} =
+1\\. In `missBART1()` its mean is \\B^\top Z_i\\, so a positive
+coefficient in `B_post` means that larger values of the predictor make
+the response more likely to be *missing*. (Versions before 0.2.0, and
+the first version of the paper, used the opposite coding.)
+
+**Prior for the responses.** Following the `BART` package (Sparapani,
+Spanbauer and McCulloch, 2021), the default `scale = "center"` fits
+\\Y\_{ij} = \mu\_{0j} + f_j(X_i) + \epsilon\_{ij}\\, with \\\mu\_{0j}\\
+the mean of the observed values of response \\j\\ and terminal node
+parameters centred at zero with standard deviation \\(\max_j - \min_j) /
+(2 k \sqrt{K})\\ for \\K\\ trees, where \\k = \sqrt{\kappa / (4K)}\\ is
+1.96 by default (see
+[`hypers_list()`](https://andrewcparnell.github.io/missBART/reference/hypers_list.md)).
+Internally this is done by standardising each response, which is
+equivalent. The probit BART model of `missBART2()` likewise has an
+offset \\\mu\_{0j} = \Phi^{-1}(\bar M_j)\\, the probit of the proportion
+of missing values of response \\j\\.
+
+**Tree updates.** Each tree is updated by a grow, prune or change
+proposal accepted with a Metropolis-Hastings step. The acceptance ratio
+includes the proposal ratio of the grow and prune moves.
+
 ## References
+
+Chipman, H. A., George, E. I. and McCulloch, R. E. (2010). BART:
+Bayesian additive regression trees. *The Annals of Applied Statistics*,
+4(1), 266-298.
+
+Sparapani, R., Spanbauer, C. and McCulloch, R. (2021). Nonparametric
+machine learning and efficient computation with Bayesian additive
+regression trees: the BART R package. *Journal of Statistical Software*,
+97(1), 1-66. <doi:10.18637/jss.v097.i01>
 
 Goh, Y. C., Soh, W. K., Parnell, A. C. and Murphy, K. (2024). Joint
 models for handling non-ignorable missing data using Bayesian additive
@@ -306,45 +347,45 @@ fit
 #> missBART1 fit: 200 observations, 2 responses
 #> Missing responses: 53 of 400 (13.2%)
 #> Posterior samples: 100 (burn-in 100, thinning 1)
-#> Tree acceptance rate: regression 0.14
+#> Tree acceptance rate: regression 0.15
 head(imputed_values(fit))
-#>   row column      mean        sd      lower    upper
-#> 1   1     Y1 0.7951750 0.2789181 0.28832332 1.290783
-#> 2   5     Y1 0.8680268 0.2504344 0.44719060 1.335738
-#> 3  10     Y1 0.6088303 0.2555736 0.05654392 1.042045
-#> 4  11     Y1 0.9759243 0.2448018 0.49286643 1.434412
-#> 5  12     Y1 0.7663950 0.2482717 0.28646051 1.246861
-#> 6  22     Y1 0.7867143 0.2395778 0.37375796 1.200557
+#>   row column      mean        sd     lower    upper
+#> 1   1     Y1 1.0008367 0.2717892 0.4486066 1.489274
+#> 2   5     Y1 1.0989380 0.2334634 0.6631485 1.570068
+#> 3  10     Y1 0.6120019 0.2457835 0.1716297 1.085211
+#> 4  11     Y1 0.7820146 0.3068687 0.1985202 1.373719
+#> 5  12     Y1 0.7540756 0.2887843 0.1828341 1.431624
+#> 6  22     Y1 0.9899950 0.2793448 0.4979206 1.649501
 coef(fit)
 #> , , mean
 #> 
 #>                   Y1         Y2
-#> Intercept  1.6870607  4.6919918
-#> X1         0.7832562  0.4425826
-#> X2         1.3711738 -0.5957830
-#> X3        -1.3374684  0.5115927
-#> Y1        -4.1586286 -0.5503308
-#> Y2         0.3426845 -3.3238790
+#> Intercept -1.9656382 -3.1954136
+#> X1        -0.5265129 -0.3406855
+#> X2        -0.8873524  0.7625772
+#> X3         1.3557372 -0.5982172
+#> Y1         4.3799813  0.6950918
+#> Y2        -0.7781849 -1.0852781
 #> 
 #> , , lower
 #> 
 #>                   Y1        Y2
-#> Intercept  1.0919603  2.526577
-#> X1        -0.8079257 -1.760812
-#> X2         0.3633939 -2.607402
-#> X3        -2.2994658 -1.212002
-#> Y1        -6.3317119 -2.812361
-#> Y2        -1.1812488 -7.373290
+#> Intercept -2.4819605 -4.034056
+#> X1        -1.7242043 -2.254201
+#> X2        -2.0192534 -0.859558
+#> X3         0.4566221 -2.106015
+#> Y1         3.0492314 -1.210050
+#> Y2        -2.9935171 -3.431173
 #> 
 #> , , upper
 #> 
-#>                   Y1        Y2
-#> Intercept  2.1490277 6.9990208
-#> X1         2.2655507 2.1798183
-#> X2         2.3506381 1.0384469
-#> X3        -0.4136713 2.3724394
-#> Y1        -1.9123977 1.7032939
-#> Y2         2.1912406 0.9553731
+#>                   Y1         Y2
+#> Intercept -1.4733225 -2.5253265
+#> X1         0.7302450  1.3884587
+#> X2         0.5039515  2.5225349
+#> X3         2.2404024  0.8156959
+#> Y1         5.8093208  1.9576431
+#> Y2         1.2527833  3.3305669
 #> 
 
 fit2 <- missBART2(x, y, n_reg_trees = 20, n_class_trees = 10, burn = 100,
@@ -352,5 +393,5 @@ fit2 <- missBART2(x, y, n_reg_trees = 20, n_class_trees = 10, burn = 100,
                   show_progress = FALSE)
 varimp(fit2)
 #>        X1        X2        X3        Y1        Y2 
-#> 0.2614935 0.1336365 0.1178880 0.3044160 0.1825660 
+#> 0.2460134 0.2079455 0.1434260 0.2065475 0.1960676 
 ```

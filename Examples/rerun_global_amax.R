@@ -4,7 +4,8 @@
 # missingness trees. The data are not distributed with the package.
 #
 # Each model is run from four different seeds, because the missBART1 chains
-# can settle in different modes on these data.
+# can settle in different modes on these data. missBART1 is run with both
+# versions of the update of the missing responses.
 #
 # Saves posterior summaries (no raw data) to
 # vignettes/articles/results/global_amax.rds and two figures (first seed of
@@ -26,11 +27,12 @@ y <- as.matrix(log(data[, c("SLA", "Aarea", "Narea", "Parea", "Gs")]))
 x <- as.matrix(data[, which(names(data) == "PPTmean"):ncol(data)])
 obs <- !is.na(y)
 
-fit_model <- function(model, seed) {
+fit_model <- function(model, seed, update = "conditional") {
   set.seed(seed)
   time <- system.time(
     fit <- if(model == "missBART1") {
-      missBART1(x, y, n_trees = 100, burn = burn, iters = iters, thin = 1, show_progress = FALSE, save_z = FALSE)
+      missBART1(x, y, n_trees = 100, burn = burn, iters = iters, thin = 1, show_progress = FALSE, save_z = FALSE,
+                ymis_update = update)
     } else {
       missBART2(x, y, n_reg_trees = 100, n_class_trees = 50, burn = burn, iters = iters, thin = 1,
                 show_progress = FALSE, save_z = FALSE)
@@ -65,8 +67,8 @@ fit_model <- function(model, seed) {
     facet_wrap(~response, scales = "free", nrow = 1) +
     labs(x = "Observed (log scale)", y = "Predicted (log scale)", title = model) +
     theme_bw()
-  if(seed == 1) ggsave(file.path("vignettes/articles/figures", paste0("amax_", model, ".png")), fig, width = 12, height = 3, dpi = 110)
-  list(model = model, seed = seed, seconds = time, per_response = per_response, tree_accept = fit$tree_accept,
+  if(seed == 1 && update == "conditional") ggsave(file.path("vignettes/articles/figures", paste0("amax_", model, ".png")), fig, width = 12, height = 3, dpi = 110)
+  list(model = model, seed = seed, update = update, seconds = time, per_response = per_response, tree_accept = fit$tree_accept,
        sigma = Reduce("+", fit$sigma_post) / length(fit$sigma_post),
        coef = if(model == "missBART1") coef(fit),
        varimp_missingness = if(model == "missBART2") varimp(fit),
@@ -76,10 +78,13 @@ fit_model <- function(model, seed) {
 
 dir.create("vignettes/articles/figures", recursive = TRUE, showWarnings = FALSE)
 dir.create("vignettes/articles/results", recursive = TRUE, showWarnings = FALSE)
-runs <- expand.grid(seed = 1:4, model = c("missBART1", "missBART2"), stringsAsFactors = FALSE)
-res <- parallel::mclapply(seq_len(nrow(runs)), function(i) fit_model(runs$model[i], runs$seed[i]), mc.cores = nrow(runs))
+# missBART1 is also run with the update of the missing responses described in the paper
+runs <- rbind(expand.grid(seed = 1:4, model = c("missBART1", "missBART2"), update = "conditional", stringsAsFactors = FALSE),
+              expand.grid(seed = 1:4, model = "missBART1", update = "marginal", stringsAsFactors = FALSE))
+res <- parallel::mclapply(seq_len(nrow(runs)), function(i) fit_model(runs$model[i], runs$seed[i], runs$update[i]),
+                          mc.cores = nrow(runs))
 saveRDS(list(runs = res, settings = list(n = nrow(y), q = ncol(x), burn = burn, iters = iters,
                                          version = as.character(packageVersion("missBART")))),
         "vignettes/articles/results/global_amax.rds")
-for(r in res) cat(sprintf("%s seed %d: %.0f s, mean imputed: %s\n", r$model, r$seed, r$seconds,
+for(r in res) cat(sprintf("%s (%s) seed %d: %.0f s, mean imputed: %s\n", r$model, r$update, r$seed, r$seconds,
                           paste(sprintf("%.2f", r$per_response$mean_imputed), collapse = " ")))

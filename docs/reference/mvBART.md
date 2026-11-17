@@ -20,7 +20,7 @@ mvBART(
   predict = TRUE,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   show_progress = TRUE,
   progress_every = 10,
   save_y_pred = TRUE,
@@ -79,10 +79,16 @@ mvBART(
 
 - scale:
 
-  logical. Scale each response to `[-0.5, 0.5]` before fitting?
+  how the responses are standardised before fitting; see Details.
+  `"center"` (the default) subtracts the mean of the observed values of
+  each response and divides by their range, `"range"` (or `TRUE`) maps
+  each response to `[-0.5, 0.5]` as in Chipman et al. (2010) and
+  versions before 0.2.0, and `"none"` (or `FALSE`) leaves them alone.
+  Unless `scale = "none"`,
   [`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
-  then also scales the covariates, so `B_post` refers to the scaled
-  variables. Everything else is returned on the original scale.
+  also scales the covariates to `[-0.5, 0.5]`, so `B_post` refers to
+  standardised variables. Everything else is returned on the original
+  scale.
 
 - show_progress:
 

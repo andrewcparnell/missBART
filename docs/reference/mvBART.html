@@ -59,7 +59,7 @@ and <code><a href="missBART.html">missBART2()</a></code> to data without missing
 <span>  predict <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  tree_prior_params <span class="op">=</span> <span class="fu"><a href="tree_list.html">tree_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
 <span>  hypers <span class="op">=</span> <span class="fu"><a href="hypers_list.html">hypers_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
-<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale <span class="op">=</span> <span class="st">"center"</span>,</span>
 <span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  progress_every <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  save_y_pred <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -117,9 +117,14 @@ iterations.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>logical. Scale each response to <code>[-0.5, 0.5]</code> before fitting?
-<code><a href="missBART.html">missBART1()</a></code> then also scales the covariates, so <code>B_post</code> refers to the
-scaled variables. Everything else is returned on the original scale.</p></dd>
+<dd><p>how the responses are standardised before fitting; see
+Details. <code>"center"</code> (the default) subtracts the mean of the observed
+values of each response and divides by their range, <code>"range"</code> (or <code>TRUE</code>)
+maps each response to <code>[-0.5, 0.5]</code> as in Chipman et al. (2010) and
+versions before 0.2.0, and <code>"none"</code> (or <code>FALSE</code>) leaves them alone.
+Unless <code>scale = "none"</code>, <code><a href="missBART.html">missBART1()</a></code> also scales the covariates to
+<code>[-0.5, 0.5]</code>, so <code>B_post</code> refers to standardised variables. Everything
+else is returned on the original scale.</p></dd>
 
 
 <dt id="arg-show-progress">show_progress<a class="anchor" aria-label="anchor" href="#arg-show-progress"></a></dt>

@@ -71,12 +71,12 @@ model on <code>(x, y)</code>. Missing responses are imputed within the sampler.
 <span>  predict <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  tree_prior_params <span class="op">=</span> <span class="fu"><a href="tree_list.html">tree_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
 <span>  hypers <span class="op">=</span> <span class="fu"><a href="hypers_list.html">hypers_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
-<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale <span class="op">=</span> <span class="st">"center"</span>,</span>
 <span>  include_x <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  include_y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  progress_every <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  pdp_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  pdp_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  make_pdp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  mice_impute <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ymis_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditional"</span>, <span class="st">"marginal"</span><span class="op">)</span>,</span>
@@ -97,12 +97,12 @@ model on <code>(x, y)</code>. Missing responses are imputed within the sampler.
 <span>  predict <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  tree_prior_params <span class="op">=</span> <span class="fu"><a href="tree_list.html">tree_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
 <span>  hypers <span class="op">=</span> <span class="fu"><a href="hypers_list.html">hypers_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
-<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale <span class="op">=</span> <span class="st">"center"</span>,</span>
 <span>  include_x <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  include_y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  progress_every <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  pdp_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  pdp_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  make_pdp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  mice_impute <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ymis_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditional"</span>, <span class="st">"marginal"</span><span class="op">)</span>,</span>
@@ -125,12 +125,12 @@ model on <code>(x, y)</code>. Missing responses are imputed within the sampler.
 <span>  MH_sd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tree_prior_params <span class="op">=</span> <span class="fu"><a href="tree_list.html">tree_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
 <span>  hypers <span class="op">=</span> <span class="fu"><a href="hypers_list.html">hypers_list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>,</span>
-<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale <span class="op">=</span> <span class="st">"center"</span>,</span>
 <span>  include_x <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  include_y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  progress_every <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  pdp_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  pdp_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  make_pdp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  mice_impute <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ymis_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditional"</span>, <span class="st">"marginal"</span><span class="op">)</span>,</span>
@@ -192,9 +192,14 @@ iterations.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>logical. Scale each response to <code>[-0.5, 0.5]</code> before fitting?
-<code>missBART1()</code> then also scales the covariates, so <code>B_post</code> refers to the
-scaled variables. Everything else is returned on the original scale.</p></dd>
+<dd><p>how the responses are standardised before fitting; see
+Details. <code>"center"</code> (the default) subtracts the mean of the observed
+values of each response and divides by their range, <code>"range"</code> (or <code>TRUE</code>)
+maps each response to <code>[-0.5, 0.5]</code> as in Chipman et al. (2010) and
+versions before 0.2.0, and <code>"none"</code> (or <code>FALSE</code>) leaves them alone.
+Unless <code>scale = "none"</code>, <code>missBART1()</code> also scales the covariates to
+<code>[-0.5, 0.5]</code>, so <code>B_post</code> refers to standardised variables. Everything
+else is returned on the original scale.</p></dd>
 
 
 <dt id="arg-include-x-include-y">include_x, include_y<a class="anchor" aria-label="anchor" href="#arg-include-x-include-y"></a></dt>
@@ -214,10 +219,11 @@ random.</p></dd>
 <dt id="arg-pdp-range-make-pdp">pdp_range, make_pdp<a class="anchor" aria-label="anchor" href="#arg-pdp-range-make-pdp"></a></dt>
 <dd><p>for <code>missBART2()</code> with a univariate response:
 if <code>make_pdp = TRUE</code>, the latent missingness predictor is evaluated over a
-grid of (scaled) response values spanning <code>pdp_range</code> at every kept
-iteration and returned in <code>pdp_out</code>; apply <code><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">stats::pnorm()</a></code> to get the
-probability of being observed. Ignored by <code>missBART1()</code>, where the same
-curves follow directly from <code>B_post</code>.</p></dd>
+grid of response values spanning <code>pdp_range</code> (on the scale of the data;
+the default is the observed range) at every kept iteration and returned
+in <code>pdp_out</code>, with the grid in <code>pdp_grid</code>; apply <code><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">stats::pnorm()</a></code> to get
+the probability of being missing. Ignored by <code>missBART1()</code>, where the
+same curves follow directly from <code>B_post</code>.</p></dd>
 
 
 <dt id="arg-mice-impute">mice_impute<a class="anchor" aria-label="anchor" href="#arg-mice-impute"></a></dt>
@@ -299,7 +305,8 @@ iteration.</p></dd>
 <dd><p>the same for the regression trees.</p></dd>
 
 <dt>z_post</dt>
-<dd><p>list of latent probit variables.</p></dd>
+<dd><p>list of latent probit variables (positive for missing
+responses).</p></dd>
 
 <dt>y_miss_accept</dt>
 <dd><p><code>missBART2()</code> only: Metropolis-Hastings acceptance
@@ -314,8 +321,39 @@ rate for each missing value.</p></dd>
 <code><a href="varimp.html">varimp()</a></code> to summarise a fit.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><strong>Missingness indicator.</strong> Write \(M_{ij} = 1\) if response \(j\) of
+observation \(i\) is missing and 0 if it is observed. Both models use a
+latent variable \(M^*_{ij}\) that is positive exactly when
+\(M_{ij} = 1\). In <code>missBART1()</code> its mean is \(B^\top Z_i\), so a
+positive coefficient in <code>B_post</code> means that larger values of the predictor
+make the response more likely to be <em>missing</em>. (Versions before 0.2.0, and
+the first version of the paper, used the opposite coding.)</p>
+<p><strong>Prior for the responses.</strong> Following the <code>BART</code> package (Sparapani,
+Spanbauer and McCulloch, 2021), the default <code>scale = "center"</code> fits
+\(Y_{ij} = \mu_{0j} + f_j(X_i) + \epsilon_{ij}\), with
+\(\mu_{0j}\) the mean of the observed values of response \(j\) and
+terminal node parameters centred at zero with standard deviation
+\((\max_j - \min_j) / (2 k \sqrt{K})\) for \(K\) trees, where
+\(k = \sqrt{\kappa / (4K)}\) is 1.96 by default (see <code><a href="hypers_list.html">hypers_list()</a></code>).
+Internally this is done by standardising each response, which is equivalent.
+The probit BART model of <code>missBART2()</code> likewise has an offset
+\(\mu_{0j} = \Phi^{-1}(\bar M_j)\), the probit of the proportion of
+missing values of response \(j\).</p>
+<p><strong>Tree updates.</strong> Each tree is updated by a grow, prune or change proposal
+accepted with a Metropolis-Hastings step. The acceptance ratio includes
+the proposal ratio of the grow and prune moves.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Goh, Y. C., Soh, W. K., Parnell, A. C. and Murphy, K. (2024).
+    <p>Chipman, H. A., George, E. I. and McCulloch, R. E. (2010). BART:
+Bayesian additive regression trees. <em>The Annals of Applied Statistics</em>,
+4(1), 266-298.</p>
+<p>Sparapani, R., Spanbauer, C. and McCulloch, R. (2021). Nonparametric
+machine learning and efficient computation with Bayesian additive
+regression trees: the BART R package. <em>Journal of Statistical Software</em>,
+97(1), 1-66. <a href="doi:10.18637/jss.v097.i01">doi:10.18637/jss.v097.i01</a></p>
+<p>Goh, Y. C., Soh, W. K., Parnell, A. C. and Murphy, K. (2024).
 Joint models for handling non-ignorable missing data using Bayesian
 additive regression trees: application to leaf photosynthetic traits
 data. <a href="doi:10.48550/arXiv.2412.14946">doi:10.48550/arXiv.2412.14946</a></p>
@@ -337,45 +375,45 @@ data. <a href="doi:10.48550/arXiv.2412.14946">doi:10.48550/arXiv.2412.14946</a><
 <span class="r-out co"><span class="r-pr">#&gt;</span> missBART1 fit: 200 observations, 2 responses</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Missing responses: 53 of 400 (13.2%)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Posterior samples: 100 (burn-in 100, thinning 1)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tree acceptance rate: regression 0.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tree acceptance rate: regression 0.15</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="imputed_values.html">imputed_values</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   row column      mean        sd      lower    upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1     Y1 0.7951750 0.2789181 0.28832332 1.290783</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   5     Y1 0.8680268 0.2504344 0.44719060 1.335738</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  10     Y1 0.6088303 0.2555736 0.05654392 1.042045</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  11     Y1 0.9759243 0.2448018 0.49286643 1.434412</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  12     Y1 0.7663950 0.2482717 0.28646051 1.246861</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  22     Y1 0.7867143 0.2395778 0.37375796 1.200557</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   row column      mean        sd     lower    upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1     Y1 1.0008367 0.2717892 0.4486066 1.489274</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   5     Y1 1.0989380 0.2334634 0.6631485 1.570068</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  10     Y1 0.6120019 0.2457835 0.1716297 1.085211</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  11     Y1 0.7820146 0.3068687 0.1985202 1.373719</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  12     Y1 0.7540756 0.2887843 0.1828341 1.431624</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  22     Y1 0.9899950 0.2793448 0.4979206 1.649501</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> , , mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   Y1         Y2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept  1.6870607  4.6919918</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X1         0.7832562  0.4425826</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X2         1.3711738 -0.5957830</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X3        -1.3374684  0.5115927</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Y1        -4.1586286 -0.5503308</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Y2         0.3426845 -3.3238790</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept -1.9656382 -3.1954136</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X1        -0.5265129 -0.3406855</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X2        -0.8873524  0.7625772</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X3         1.3557372 -0.5982172</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Y1         4.3799813  0.6950918</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Y2        -0.7781849 -1.0852781</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> , , lower</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   Y1        Y2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept  1.0919603  2.526577</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X1        -0.8079257 -1.760812</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X2         0.3633939 -2.607402</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X3        -2.2994658 -1.212002</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Y1        -6.3317119 -2.812361</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Y2        -1.1812488 -7.373290</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept -2.4819605 -4.034056</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X1        -1.7242043 -2.254201</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X2        -2.0192534 -0.859558</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X3         0.4566221 -2.106015</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Y1         3.0492314 -1.210050</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Y2        -2.9935171 -3.431173</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> , , upper</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   Y1        Y2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept  2.1490277 6.9990208</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X1         2.2655507 2.1798183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X2         2.3506381 1.0384469</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> X3        -0.4136713 2.3724394</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Y1        -1.9123977 1.7032939</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Y2         2.1912406 0.9553731</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   Y1         Y2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept -1.4733225 -2.5253265</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X1         0.7302450  1.3884587</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X2         0.5039515  2.5225349</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X3         2.2404024  0.8156959</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Y1         5.8093208  1.9576431</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Y2         1.2527833  3.3305669</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu">missBART2</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, n_reg_trees <span class="op">=</span> <span class="fl">20</span>, n_class_trees <span class="op">=</span> <span class="fl">10</span>, burn <span class="op">=</span> <span class="fl">100</span>,</span></span>
@@ -383,7 +421,7 @@ data. <a href="doi:10.48550/arXiv.2412.14946">doi:10.48550/arXiv.2412.14946</a><
 <span class="r-in"><span>                  show_progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="varimp.html">varimp</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        X1        X2        X3        Y1        Y2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.2614935 0.1336365 0.1178880 0.3044160 0.1825660 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.2460134 0.2079455 0.1434260 0.2065475 0.1960676 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

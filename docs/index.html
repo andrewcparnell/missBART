@@ -120,7 +120,7 @@
 <span><span class="va">fit1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/imputed_values.html">imputed_values</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span><span class="op">)</span>   <span class="co"># posterior summaries of the missing responses</span></span>
 <span><span class="va">y_complete</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/imputed_values.html">completed_data</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span>                   <span class="co"># probit coefficients: is the missingness driven by y?</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span>                   <span class="co"># probit coefficients: positive = more likely to be missing</span></span>
 <span><span class="fu"><a href="reference/varimp.html">varimp</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span>                 <span class="co"># which predictors the missingness trees split on</span></span></code></pre></div>
 <p><code><a href="articles/missBART.html">vignette("missBART")</a></code> has a longer walk-through, and the <a href="https://andrewcparnell.github.io/missBART/">package website</a> has further articles, including a re-run of the simulation studies in the paper. Scripts for the simulations and the application in the paper are in <a href="Examples"><code>Examples/</code></a>.</p>
 </div>
@@ -233,16 +233,16 @@
 <tr>
 <td>missBART1</td>
 <td align="right">621 s</td>
-<td align="right">2.0 s</td>
+<td align="right">1.7 s</td>
 <td align="right">1.24</td>
-<td align="right">1.15</td>
+<td align="right">1.17</td>
 </tr>
 <tr>
 <td>missBART2</td>
 <td align="right">246 s</td>
-<td align="right">1.8 s</td>
+<td align="right">1.5 s</td>
 <td align="right">1.16</td>
-<td align="right">1.15</td>
+<td align="right">1.11</td>
 </tr>
 <tr>
 <td>mvBART</td>

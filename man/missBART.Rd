@@ -18,12 +18,12 @@ missBART1(
   predict = TRUE,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   include_x = TRUE,
   include_y = TRUE,
   show_progress = TRUE,
   progress_every = 10,
-  pdp_range = c(-0.5, 0.5),
+  pdp_range = NULL,
   make_pdp = FALSE,
   mice_impute = TRUE,
   ymis_update = c("conditional", "marginal"),
@@ -44,12 +44,12 @@ missBARTprobit(
   predict = TRUE,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   include_x = TRUE,
   include_y = TRUE,
   show_progress = TRUE,
   progress_every = 10,
-  pdp_range = c(-0.5, 0.5),
+  pdp_range = NULL,
   make_pdp = FALSE,
   mice_impute = TRUE,
   ymis_update = c("conditional", "marginal"),
@@ -72,12 +72,12 @@ missBART2(
   MH_sd = NULL,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   include_x = TRUE,
   include_y = TRUE,
   show_progress = TRUE,
   progress_every = 10,
-  pdp_range = c(-0.5, 0.5),
+  pdp_range = NULL,
   make_pdp = FALSE,
   mice_impute = TRUE,
   ymis_update = c("conditional", "marginal"),
@@ -114,9 +114,14 @@ iterations.}
 \item{hypers}{hyperparameters of the BART model for the responses, see
 \code{\link[=hypers_list]{hypers_list()}}.}
 
-\item{scale}{logical. Scale each response to \verb{[-0.5, 0.5]} before fitting?
-\code{missBART1()} then also scales the covariates, so \code{B_post} refers to the
-scaled variables. Everything else is returned on the original scale.}
+\item{scale}{how the responses are standardised before fitting; see
+Details. \code{"center"} (the default) subtracts the mean of the observed
+values of each response and divides by their range, \code{"range"} (or \code{TRUE})
+maps each response to \verb{[-0.5, 0.5]} as in Chipman et al. (2010) and
+versions before 0.2.0, and \code{"none"} (or \code{FALSE}) leaves them alone.
+Unless \code{scale = "none"}, \code{missBART1()} also scales the covariates to
+\verb{[-0.5, 0.5]}, so \code{B_post} refers to standardised variables. Everything
+else is returned on the original scale.}
 
 \item{include_x, include_y}{logical. Use \code{x} and/or \code{y} as predictors of the
 missingness? \code{include_y = FALSE} assumes the responses are missing at
@@ -128,10 +133,11 @@ random.}
 
 \item{pdp_range, make_pdp}{for \code{missBART2()} with a univariate response:
 if \code{make_pdp = TRUE}, the latent missingness predictor is evaluated over a
-grid of (scaled) response values spanning \code{pdp_range} at every kept
-iteration and returned in \code{pdp_out}; apply \code{\link[stats:pnorm]{stats::pnorm()}} to get the
-probability of being observed. Ignored by \code{missBART1()}, where the same
-curves follow directly from \code{B_post}.}
+grid of response values spanning \code{pdp_range} (on the scale of the data;
+the default is the observed range) at every kept iteration and returned
+in \code{pdp_out}, with the grid in \code{pdp_grid}; apply \code{\link[stats:pnorm]{stats::pnorm()}} to get
+the probability of being missing. Ignored by \code{missBART1()}, where the
+same curves follow directly from \code{B_post}.}
 
 \item{mice_impute}{logical. Initialise the missing responses with
 \code{\link[mice:mice]{mice::mice()}}? Otherwise they start at the centre of the observed range.}
@@ -180,7 +186,8 @@ correlation matrices, and prior precisions of the coefficients.}
 rules on each predictor in the missingness trees, one row per kept
 iteration.}
 \item{var_imp_reg}{the same for the regression trees.}
-\item{z_post}{list of latent probit variables.}
+\item{z_post}{list of latent probit variables (positive for missing
+responses).}
 \item{y_miss_accept}{\code{missBART2()} only: Metropolis-Hastings acceptance
 rate for each missing value.}
 \item{tree_accept}{acceptance rates of the tree proposals.}
@@ -196,6 +203,31 @@ Parnell and Murphy (2024). Both use multivariate BART for the responses.
 regression on \verb{(1, x, y)}; \code{missBART2()} uses a multivariate probit BART
 model on \verb{(x, y)}. Missing responses are imputed within the sampler.
 \code{missBARTprobit()} is the former name of \code{missBART1()}.
+}
+\details{
+\strong{Missingness indicator.} Write \eqn{M_{ij} = 1} if response \eqn{j} of
+observation \eqn{i} is missing and 0 if it is observed. Both models use a
+latent variable \eqn{M^*_{ij}} that is positive exactly when
+\eqn{M_{ij} = 1}. In \code{missBART1()} its mean is \eqn{B^\top Z_i}, so a
+positive coefficient in \code{B_post} means that larger values of the predictor
+make the response more likely to be \emph{missing}. (Versions before 0.2.0, and
+the first version of the paper, used the opposite coding.)
+
+\strong{Prior for the responses.} Following the \code{BART} package (Sparapani,
+Spanbauer and McCulloch, 2021), the default \code{scale = "center"} fits
+\eqn{Y_{ij} = \mu_{0j} + f_j(X_i) + \epsilon_{ij}}, with
+\eqn{\mu_{0j}} the mean of the observed values of response \eqn{j} and
+terminal node parameters centred at zero with standard deviation
+\eqn{(\max_j - \min_j) / (2 k \sqrt{K})} for \eqn{K} trees, where
+\eqn{k = \sqrt{\kappa / (4K)}} is 1.96 by default (see \code{\link[=hypers_list]{hypers_list()}}).
+Internally this is done by standardising each response, which is equivalent.
+The probit BART model of \code{missBART2()} likewise has an offset
+\eqn{\mu_{0j} = \Phi^{-1}(\bar M_j)}, the probit of the proportion of
+missing values of response \eqn{j}.
+
+\strong{Tree updates.} Each tree is updated by a grow, prune or change proposal
+accepted with a Metropolis-Hastings step. The acceptance ratio includes
+the proposal ratio of the grow and prune moves.
 }
 \examples{
 set.seed(1)
@@ -218,6 +250,15 @@ fit2 <- missBART2(x, y, n_reg_trees = 20, n_class_trees = 10, burn = 100,
 varimp(fit2)
 }
 \references{
+Chipman, H. A., George, E. I. and McCulloch, R. E. (2010). BART:
+Bayesian additive regression trees. \emph{The Annals of Applied Statistics},
+4(1), 266-298.
+
+Sparapani, R., Spanbauer, C. and McCulloch, R. (2021). Nonparametric
+machine learning and efficient computation with Bayesian additive
+regression trees: the BART R package. \emph{Journal of Statistical Software},
+97(1), 1-66. \url{doi:10.18637/jss.v097.i01}
+
 Goh, Y. C., Soh, W. K., Parnell, A. C. and Murphy, K. (2024).
 Joint models for handling non-ignorable missing data using Bayesian
 additive regression trees: application to leaf photosynthetic traits

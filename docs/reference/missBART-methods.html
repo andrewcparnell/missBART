@@ -89,7 +89,9 @@
 the training rows and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> the same at the <code>x_predict</code> supplied
 when fitting. <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> returns the posterior mean of the probit
 coefficients of a <code><a href="missBART.html">missBART1()</a></code> fit together with their posterior
-intervals (an array with one slice per summary).</p>
+intervals (an array with one slice per summary). A positive coefficient
+means that larger values of the predictor make the response more likely
+to be missing.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -1,11 +1,13 @@
 # Simulation checking
 
 The samplers in **missBART** were rewritten in C++ for version 0.2.0,
-and a few steps were corrected along the way (see the
-[changelog](https://andrewcparnell.github.io/missBART/news/index.md)).
-This article re-runs the simulation studies of Goh, Soh, Parnell and
-Murphy (2024, [arXiv:2412.14946](https://arxiv.org/abs/2412.14946)) with
-the new code and compares the results with those reported in the paper.
+and several steps were corrected or changed along the way (see the
+[changelog](https://andrewcparnell.github.io/missBART/news/index.md)):
+among others, the update of the missing responses, a proposal ratio in
+the tree updates, and the standardisation of the responses. This article
+re-runs the simulation studies of Goh, Soh, Parnell and Murphy (2024,
+[arXiv:2412.14946](https://arxiv.org/abs/2412.14946)) with the new code
+and compares the results with those reported in the paper.
 
 ## What was run
 
@@ -33,7 +35,7 @@ The code is in
 [`Examples/rerun_paper_simulations.R`](https://github.com/yongchengoh/missBART/blob/main/Examples/rerun_paper_simulations.R).
 This article only reads the predictions that script saved.
 
-408 model fits were run (0 failed), taking 7.2 hours of computing time
+408 model fits were run (0 failed), taking 7.1 hours of computing time
 in total, or about 7 minutes on 60 cores.
 
 ## Bivariate examples (Figure 1 of the paper)
@@ -48,21 +50,21 @@ A dash means the paper omitted the result because it was off the scale.
 | scenario | cells | source | missBART1 | missBART2 | mvBART_cc | mvBART_imp | uni_missBART1 | uni_missBART2 | uniBART_cc | uniBART_imp |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|
 | MAR_1 | missing | paper | 23.0 | 23.5 | 23.0 | 25.8 | 23.5 | 24.0 | 23.2 | 26.0 |
-|  |  | 0.2.0 | 23.5 | 22.6 | 23.1 | 26.1 | 23.5 | 22.7 | 23.2 | 25.9 |
+|  |  | 0.2.0 | 23.5 | 23.6 | 22.4 | 26.5 | 23.0 | 23.7 | 23.0 | 26.2 |
 | MAR_1 | combined | paper | 32.4 | 32.9 | 32.7 | 35.2 | 33.2 | 33.7 | 33.2 | 35.2 |
-|  |  | 0.2.0 | 32.9 | 32.5 | 32.9 | 35.4 | 33.3 | 32.9 | 33.2 | 35.4 |
+|  |  | 0.2.0 | 33.1 | 33.0 | 32.9 | 35.8 | 33.3 | 33.4 | 33.1 | 35.6 |
 | MAR_2 | missing | paper | 12.7 | 12.2 | 12.8 | 12.3 | 13.0 | 12.5 | 12.3 | 12.4 |
-|  |  | 0.2.0 | 13.0 | 12.6 | 13.2 | 12.5 | 13.0 | 12.7 | 12.5 | 12.6 |
+|  |  | 0.2.0 | 13.1 | 12.4 | 13.0 | 12.6 | 13.4 | 12.5 | 12.5 | 12.8 |
 | MAR_2 | combined | paper | 30.9 | 30.2 | 31.5 | 30.4 | 30.9 | 30.5 | 30.2 | 30.4 |
-|  |  | 0.2.0 | 30.7 | 30.6 | 31.1 | 30.2 | 31.1 | 30.5 | 30.4 | 30.3 |
+|  |  | 0.2.0 | 31.2 | 30.7 | 31.5 | 30.5 | 31.2 | 30.6 | 30.2 | 30.5 |
 | MNAR_1 | missing | paper | 19.6 | 18.5 | 25.2 | 31.2 | 21.0 | 19.4 | 22.2 | 31.3 |
-|  |  | 0.2.0 | 19.2 | 18.6 | 25.6 | 31.3 | 20.2 | 20.1 | 21.9 | 31.4 |
+|  |  | 0.2.0 | 19.0 | 18.8 | 25.6 | 31.7 | 19.6 | 19.9 | 22.0 | 31.4 |
 | MNAR_1 | combined | paper | 31.4 | 32.0 | – | 40.1 | 32.1 | 31.8 | 33.0 | 40.5 |
-|  |  | 0.2.0 | 31.6 | 31.9 | 50.8 | 40.3 | 32.0 | 31.8 | 32.5 | 40.6 |
+|  |  | 0.2.0 | 31.3 | 32.2 | 50.4 | 40.7 | 32.1 | 32.0 | 32.9 | 40.2 |
 | MNAR_2 | missing | paper | 21.5 | 18.8 | 36.5 | – | 26.0 | 20.6 | 27.0 | – |
-|  |  | 0.2.0 | 21.7 | 19.6 | 35.6 | 55.3 | 22.5 | 20.5 | 27.7 | 55.0 |
+|  |  | 0.2.0 | 22.3 | 19.4 | 36.5 | 55.0 | 22.2 | 20.8 | 28.9 | 54.8 |
 | MNAR_2 | combined | paper | 32.3 | 31.2 | – | – | 35.4 | 32.3 | 36.0 | – |
-|  |  | 0.2.0 | 32.3 | 31.4 | 52.5 | 60.3 | 33.2 | 31.8 | 36.5 | 60.6 |
+|  |  | 0.2.0 | 32.9 | 31.2 | 53.7 | 60.4 | 33.1 | 32.2 | 37.9 | 60.6 |
 
 The new code reproduces the paper’s results, and with them its
 conclusions:
@@ -76,21 +78,24 @@ conclusions:
   was generated from trees (MAR 2, MNAR 2).
 
 The largest difference is `uni_missBART1` in MNAR 2, which does better
-here (22.5 against about 26 for the missing responses).
+here (22.2 against about 26 for the missing responses).
 
 ## Recovering the missingness mechanism (Figures 2 and 3)
 
 The probit coefficients of `missBART1`, from the first fold. Each panel
 is the missingness of one response. As in Figure 2 of the paper, the
 intervals for the coefficients of the responses (`Y1`, `Y2`) cover zero
-when the data are MAR and are far from zero when they are MNAR.
+when the data are MAR and are far from zero when they are MNAR. The
+package now codes a missing response as 1, so a positive coefficient
+means “more likely to be missing” and all signs are the opposite of
+those in the paper’s figure.
 
 ![](simulation-checking_files/figure-html/fig2-1.png)
 
-The numbers also agree closely with the paper. For example, in MAR 1 the
-coefficients of `X2` and `X4` for the first response are about 7 in
-both, and in MNAR 1 the coefficients of `Y1` are about 5.6 and -7.5 in
-both.
+Apart from the sign, the numbers agree closely with the paper. In MAR 1
+the coefficients of `X2` and `X4` for the first response are -6.7 and
+-6.9 (about 7 in the paper), and in MNAR 1 the coefficients of `Y1` are
+-5.6 and 7.4 (about 5.6 and -7.5 in the paper).
 
 The variable importance in the missingness trees of `missBART2`, from
 the first fold. As in Figure 3 of the paper, the covariates (`X3` in
@@ -106,11 +111,11 @@ under MNAR 2.
 | scenario | cells | source | missBART1 | missBART2 | missBART2_impX | mvBART_cc | mvBART_imp | uni_missBART1 | uni_missBART2 | uniBART_cc | uniBART_imp |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | MNAR_amp0 | combined | paper | 30.5 | 30.5 | – | 52.0 | 37.0 | 49.0 | 36.5 | 38.0 | 37.0 |
-|  |  | 0.2.0 | 30.5 | 30.6 | – | 51.6 | 36.8 | 51.4 | 36.2 | 37.5 | 36.8 |
+|  |  | 0.2.0 | 30.4 | 30.5 | – | 51.4 | 36.7 | 51.4 | 36.2 | 37.6 | 36.8 |
 | MNAR_amp1 | combined | paper | 31.0 | 31.8 | 30.8 | 52.0 | 38.0 | 48.0 | 37.0 | 38.5 | 37.8 |
-|  |  | 0.2.0 | 30.6 | 31.9 | 30.8 | 51.9 | 37.8 | 50.9 | 37.1 | 38.4 | 37.4 |
+|  |  | 0.2.0 | 30.7 | 32.3 | 30.8 | 51.7 | 37.7 | 50.8 | 37.1 | 38.5 | 37.6 |
 | MNAR_amp2 | combined | paper | 33.5 | 36.5 | 31.5 | 54.5 | 41.0 | 43.0 | 42.0 | 42.5 | 41.0 |
-|  |  | 0.2.0 | 31.9 | 36.4 | 32.0 | 54.1 | 40.7 | 47.9 | 41.6 | 42.4 | 40.5 |
+|  |  | 0.2.0 | 31.6 | 36.5 | 32.1 | 54.1 | 40.7 | 48.5 | 42.4 | 42.4 | 40.5 |
 
 Again the agreement is close: the joint multivariate models are clearly
 best, and covariate imputation helps `missBART2` when many covariates
@@ -127,10 +132,10 @@ D.3 (at $`p_t = 1`$).
 
 | model | u-shape, original code | u-shape, 0.2.0 | n-shape, paper | n-shape, 0.2.0 |
 |:---|---:|---:|---:|---:|
-| missBART1 | 1.18 | 1.21 | 1.32 | 1.38 |
-| missBART2 | 1.16 | 1.17 | 1.16 | 1.16 |
-| uniBART_cc | 1.15 | 1.18 | 1.31 | 1.30 |
-| uniBART_imp | 1.63 | 1.61 | – | 2.45 |
+| missBART1 | 1.18 | 1.20 | 1.32 | 1.40 |
+| missBART2 | 1.16 | 1.16 | 1.16 | 1.15 |
+| uniBART_cc | 1.15 | 1.18 | 1.31 | 1.28 |
+| uniBART_imp | 1.63 | 1.62 | – | 2.45 |
 
 The conclusions are unchanged: all three sensible methods do equally
 well for u-shaped missingness, and only `missBART2` copes with n-shaped
@@ -146,13 +151,13 @@ distribution (`ymis_update = "marginal"`). Both were run here.
 
 | scenario | missing: conditional | missing: marginal | combined: conditional | combined: marginal |
 |:---|---:|---:|---:|---:|
-| MAR_1 | 23.5 | 23.1 | 32.9 | 32.9 |
-| MAR_2 | 13.0 | 13.0 | 30.7 | 30.5 |
-| MNAR_1 | 19.2 | 19.2 | 31.6 | 31.5 |
-| MNAR_2 | 21.7 | 26.1 | 32.3 | 36.0 |
-| MNAR_amp0 | 21.6 | 21.7 | 30.5 | 30.5 |
-| MNAR_amp1 | 22.0 | 22.0 | 30.6 | 30.6 |
-| MNAR_amp2 | 24.0 | 23.8 | 31.9 | 31.9 |
+| MAR_1 | 23.5 | 23.4 | 33.1 | 32.9 |
+| MAR_2 | 13.1 | 13.5 | 31.2 | 30.6 |
+| MNAR_1 | 19.0 | 18.9 | 31.3 | 31.6 |
+| MNAR_2 | 22.3 | 25.6 | 32.9 | 35.5 |
+| MNAR_amp0 | 21.6 | 21.6 | 30.4 | 30.4 |
+| MNAR_amp1 | 22.0 | 21.9 | 30.7 | 30.5 |
+| MNAR_amp2 | 23.9 | 23.7 | 31.6 | 31.7 |
 
 On these data sets the two versions give almost the same predictions,
 except in MNAR 2 where the conditional update is clearly better. The
@@ -170,15 +175,15 @@ the sum over responses.
 
 | model          | One response | Two responses | Five responses |
 |:---------------|-------------:|--------------:|---------------:|
-| missBART1      |           24 |            33 |             72 |
-| missBART2      |           24 |            32 |             84 |
+| missBART1      |           23 |            31 |             71 |
+| missBART2      |           25 |            31 |             80 |
 | missBART2_impX |            – |             – |             82 |
 | mvBART_cc      |            – |            12 |              7 |
-| mvBART_imp     |            – |            24 |             42 |
-| uni_missBART1  |            – |            50 |            144 |
-| uni_missBART2  |            – |            53 |            213 |
-| uniBART_cc     |           14 |            29 |             51 |
-| uniBART_imp    |           20 |            42 |            109 |
+| mvBART_imp     |            – |            24 |             43 |
+| uni_missBART1  |            – |            48 |            144 |
+| uni_missBART2  |            – |            52 |            199 |
+| uniBART_cc     |           13 |            29 |             51 |
+| uniBART_imp    |           22 |            44 |            112 |
 
 The fits ran 60 at a time on a shared machine, so these are slower than
 a fit run on its own. With the original R code a single `missBART1` fit

@@ -13,7 +13,9 @@ post_mean <- function(draws) Reduce("+", draws) / length(draws)
 #'   the training rows and `predict()` the same at the `x_predict` supplied
 #'   when fitting. `coef()` returns the posterior mean of the probit
 #'   coefficients of a `missBART1()` fit together with their posterior
-#'   intervals (an array with one slice per summary).
+#'   intervals (an array with one slice per summary). A positive coefficient
+#'   means that larger values of the predictor make the response more likely
+#'   to be missing.
 #' @name missBART-methods
 NULL
 

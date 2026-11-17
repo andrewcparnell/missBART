@@ -15,7 +15,7 @@ mvBART(
   predict = TRUE,
   tree_prior_params = tree_list(...),
   hypers = hypers_list(...),
-  scale = TRUE,
+  scale = "center",
   show_progress = TRUE,
   progress_every = 10,
   save_y_pred = TRUE,
@@ -48,9 +48,14 @@ iterations.}
 \item{hypers}{hyperparameters of the BART model for the responses, see
 \code{\link[=hypers_list]{hypers_list()}}.}
 
-\item{scale}{logical. Scale each response to \verb{[-0.5, 0.5]} before fitting?
-\code{missBART1()} then also scales the covariates, so \code{B_post} refers to the
-scaled variables. Everything else is returned on the original scale.}
+\item{scale}{how the responses are standardised before fitting; see
+Details. \code{"center"} (the default) subtracts the mean of the observed
+values of each response and divides by their range, \code{"range"} (or \code{TRUE})
+maps each response to \verb{[-0.5, 0.5]} as in Chipman et al. (2010) and
+versions before 0.2.0, and \code{"none"} (or \code{FALSE}) leaves them alone.
+Unless \code{scale = "none"}, \code{missBART1()} also scales the covariates to
+\verb{[-0.5, 0.5]}, so \code{B_post} refers to standardised variables. Everything
+else is returned on the original scale.}
 
 \item{show_progress}{logical. Print the iteration count?}
 
