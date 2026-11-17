@@ -12,6 +12,7 @@ articles:
   navbar: ~
   contents:
   - articles/simulation-checking
+  - articles/global-amax
 
 reference:
 - title: Models

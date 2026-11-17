@@ -188,4 +188,6 @@ of this size takes hours.
 
 The C++ samplers reproduce the simulation results of the paper to within
 the accuracy with which they can be read from its figures, and the
-conclusions of its simulation studies hold.
+conclusions of its simulation studies hold. The [real data
+article](global-amax.md) looks at the application in the paper, where
+the picture for `missBART1` is less clear-cut.

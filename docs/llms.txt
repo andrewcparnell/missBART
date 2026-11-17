@@ -165,3 +165,4 @@ Fit the joint models, or multivariate BART on its own.
 ### Articles
 
 - [Simulation checking](simulation-checking.md):
+- [Real data: leaf photosynthetic traits](global-amax.md):
