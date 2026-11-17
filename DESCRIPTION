@@ -17,7 +17,7 @@ Description: Selection models for multivariate responses with missing values
     Parnell and Murphy (2024) <doi:10.48550/arXiv.2412.14946>.
 License: GPL (>= 3)
 Encoding: UTF-8
-URL: https://github.com/yongchengoh/missBART
+URL: https://github.com/yongchengoh/missBART, https://andrewcparnell.github.io/missBART/
 BugReports: https://github.com/yongchengoh/missBART/issues
 Imports:
     mice,

@@ -1,5 +1,8 @@
 # missBART
 
+**Website and documentation:
+<https://andrewcparnell.github.io/missBART/>**
+
 Joint models for multivariate responses with non-ignorable missing
 values, built on Bayesian additive regression trees (BART).
 
@@ -11,9 +14,9 @@ responses are imputed while the model is fitted:
 
 | Function | Model for the missingness |
 |----|----|
-| [`missBART1()`](reference/missBART.md) | multivariate probit regression on `(1, x, y)` |
-| [`missBART2()`](reference/missBART.md) | multivariate probit BART on `(x, y)` |
-| [`mvBART()`](reference/mvBART.md) | none: multivariate BART for complete responses |
+| [`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md) | multivariate probit regression on `(1, x, y)` |
+| [`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md) | multivariate probit BART on `(x, y)` |
+| [`mvBART()`](https://andrewcparnell.github.io/missBART/reference/mvBART.md) | none: multivariate BART for complete responses |
 
 The methods are described in
 
@@ -59,11 +62,12 @@ coef(fit1)                   # probit coefficients: is the missingness driven by
 varimp(fit2)                 # which predictors the missingness trees split on
 ```
 
-[`vignette("missBART")`](articles/missBART.md) has a longer
-walk-through, and the package website (built into `docs/`) has further
+[`vignette("missBART")`](https://andrewcparnell.github.io/missBART/articles/missBART.md)
+has a longer walk-through, and the [package
+website](https://andrewcparnell.github.io/missBART/) has further
 articles, including a re-run of the simulation studies in the paper.
 Scripts for the simulations and the application in the paper are in
-[`Examples/`](Examples).
+[`Examples/`](https://andrewcparnell.github.io/missBART/Examples).
 
 ## Speed
 
@@ -88,7 +92,8 @@ averages over the first 50 iterations only, when the trees are still
 small, so they flatter the R code. At these rates the 10,000 iterations
 used in the paper for `n = 2000` and five responses take about 55
 seconds with `missBART1`, instead of about 4.3 hours.
-[`Examples/benchmark.R`](Examples/benchmark.R) reproduces the table.
+[`Examples/benchmark.R`](https://andrewcparnell.github.io/missBART/Examples/benchmark.R)
+reproduces the table.
 
 Running both versions for the same 2,000 iterations on one simulated
 data set (`n = 500`, two responses) gave:
@@ -100,4 +105,5 @@ data set (`n = 500`, two responses) gave:
 | mvBART    |      196 s |      1.1 s |                     – |                     – |
 
 The two versions do not produce identical draws for the same seed, and a
-few steps of the sampler were changed; see [`NEWS.md`](NEWS.md).
+few steps of the sampler were changed; see
+[`NEWS.md`](https://andrewcparnell.github.io/missBART/NEWS.md).

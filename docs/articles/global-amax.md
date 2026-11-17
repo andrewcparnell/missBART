@@ -1,10 +1,13 @@
 # Real data: leaf photosynthetic traits
 
-This article fits [`missBART1()`](../reference/missBART.md) and
-[`missBART2()`](../reference/missBART.md) to the *global Amax* data of
-Maire et al. (2015), the application in Section 7 of Goh, Soh, Parnell
-and Murphy (2024, [arXiv:2412.14946](https://arxiv.org/abs/2412.14946)),
-using version 0.2.0 of the package.
+This article fits
+[`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+and
+[`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+to the *global Amax* data of Maire et al. (2015), the application in
+Section 7 of Goh, Soh, Parnell and Murphy (2024,
+[arXiv:2412.14946](https://arxiv.org/abs/2412.14946)), using version
+0.2.0 of the package.
 
 ## The data
 

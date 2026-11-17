@@ -26,8 +26,10 @@ coef(object, probs = c(0.025, 0.975), ...)
 - x, object:
 
   an object of class `"missBART"` returned by
-  [`missBART1()`](missBART.md), [`missBART2()`](missBART.md) or
-  [`mvBART()`](mvBART.md).
+  [`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md),
+  [`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+  or
+  [`mvBART()`](https://andrewcparnell.github.io/missBART/reference/mvBART.md).
 
 - ...:
 
@@ -49,6 +51,7 @@ posterior mean of the BART mean function for the training rows and
 [`predict()`](https://rdrr.io/r/stats/predict.html) the same at the
 `x_predict` supplied when fitting.
 [`coef()`](https://rdrr.io/r/stats/coef.html) returns the posterior mean
-of the probit coefficients of a [`missBART1()`](missBART.md) fit
-together with their posterior intervals (an array with one slice per
+of the probit coefficients of a
+[`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+fit together with their posterior intervals (an array with one slice per
 summary).

@@ -1,10 +1,12 @@
 # Prior for the probit regression coefficients of missBART1
 
-In [`missBART1()`](missBART.md) the probit coefficients have prior
-precisions `tau_0` (intercept), `tau_X` (covariates) and `tau_Y`
-(responses) with `Gamma(a, b)` priors (shape `a`, rate `b`). A prior
-that favours large `tau_Y` shrinks the coefficients of the responses
-towards zero, i.e. favours data that are missing at random.
+In
+[`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+the probit coefficients have prior precisions `tau_0` (intercept),
+`tau_X` (covariates) and `tau_Y` (responses) with `Gamma(a, b)` priors
+(shape `a`, rate `b`). A prior that favours large `tau_Y` shrinks the
+coefficients of the responses towards zero, i.e. favours data that are
+missing at random.
 
 ## Usage
 

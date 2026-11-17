@@ -96,8 +96,10 @@ missBART2(
 - x:
 
   numeric matrix (or data frame) of covariates. Missing covariate values
-  are allowed in `missBART2()` and [`mvBART()`](mvBART.md), where they
-  are handled inside the trees; `missBART1()` needs complete covariates.
+  are allowed in `missBART2()` and
+  [`mvBART()`](https://andrewcparnell.github.io/missBART/reference/mvBART.md),
+  where they are handled inside the trees; `missBART1()` needs complete
+  covariates.
 
 - y:
 
@@ -129,12 +131,13 @@ missBART2(
 
 - tree_prior_params:
 
-  tree prior and proposal settings, see [`tree_list()`](tree_list.md).
+  tree prior and proposal settings, see
+  [`tree_list()`](https://andrewcparnell.github.io/missBART/reference/tree_list.md).
 
 - hypers:
 
   hyperparameters of the BART model for the responses, see
-  [`hypers_list()`](hypers_list.md).
+  [`hypers_list()`](https://andrewcparnell.github.io/missBART/reference/hypers_list.md).
 
 - scale:
 
@@ -185,7 +188,8 @@ missBART2(
 - probit_prior:
 
   gamma prior settings for the precisions of the probit coefficients in
-  `missBART1()`, see [`probit_prior_list()`](probit_prior_list.md).
+  `missBART1()`, see
+  [`probit_prior_list()`](https://andrewcparnell.github.io/missBART/reference/probit_prior_list.md).
 
 - save_y_pred:
 
@@ -198,9 +202,11 @@ missBART2(
 
 - ...:
 
-  further arguments passed to [`tree_list()`](tree_list.md) and
-  [`hypers_list()`](hypers_list.md). Arguments of earlier versions that
-  are no longer used are ignored.
+  further arguments passed to
+  [`tree_list()`](https://andrewcparnell.github.io/missBART/reference/tree_list.md)
+  and
+  [`hypers_list()`](https://andrewcparnell.github.io/missBART/reference/hypers_list.md).
+  Arguments of earlier versions that are no longer used are ignored.
 
 - n_class_trees:
 
@@ -266,10 +272,15 @@ An object of class `"missBART"`: a list with, among others,
 
   acceptance rates of the tree proposals.
 
-Use [fitted()](missBART-methods.md), [predict()](missBART-methods.md),
-[`imputed_values()`](imputed_values.md),
-[`completed_data()`](imputed_values.md), [coef()](missBART-methods.md)
-and [`varimp()`](varimp.md) to summarise a fit.
+Use
+[fitted()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md),
+[predict()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md),
+[`imputed_values()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md),
+[`completed_data()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md),
+[coef()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
+and
+[`varimp()`](https://andrewcparnell.github.io/missBART/reference/varimp.md)
+to summarise a fit.
 
 ## References
 

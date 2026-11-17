@@ -1,8 +1,10 @@
 # Multivariate BART for complete responses
 
 Fits the multivariate BART model used for the responses in
-[`missBART1()`](missBART.md) and [`missBART2()`](missBART.md) to data
-without missing responses.
+[`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+and
+[`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+to data without missing responses.
 
 ## Usage
 
@@ -31,9 +33,11 @@ mvBART(
 - x:
 
   numeric matrix (or data frame) of covariates. Missing covariate values
-  are allowed in [`missBART2()`](missBART.md) and `mvBART()`, where they
-  are handled inside the trees; [`missBART1()`](missBART.md) needs
-  complete covariates.
+  are allowed in
+  [`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+  and `mvBART()`, where they are handled inside the trees;
+  [`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+  needs complete covariates.
 
 - y:
 
@@ -65,19 +69,20 @@ mvBART(
 
 - tree_prior_params:
 
-  tree prior and proposal settings, see [`tree_list()`](tree_list.md).
+  tree prior and proposal settings, see
+  [`tree_list()`](https://andrewcparnell.github.io/missBART/reference/tree_list.md).
 
 - hypers:
 
   hyperparameters of the BART model for the responses, see
-  [`hypers_list()`](hypers_list.md).
+  [`hypers_list()`](https://andrewcparnell.github.io/missBART/reference/hypers_list.md).
 
 - scale:
 
   logical. Scale each response to `[-0.5, 0.5]` before fitting?
-  [`missBART1()`](missBART.md) then also scales the covariates, so
-  `B_post` refers to the scaled variables. Everything else is returned
-  on the original scale.
+  [`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+  then also scales the covariates, so `B_post` refers to the scaled
+  variables. Everything else is returned on the original scale.
 
 - show_progress:
 
@@ -94,13 +99,16 @@ mvBART(
 
 - ...:
 
-  further arguments passed to [`tree_list()`](tree_list.md) and
-  [`hypers_list()`](hypers_list.md). Arguments of earlier versions that
-  are no longer used are ignored.
+  further arguments passed to
+  [`tree_list()`](https://andrewcparnell.github.io/missBART/reference/tree_list.md)
+  and
+  [`hypers_list()`](https://andrewcparnell.github.io/missBART/reference/hypers_list.md).
+  Arguments of earlier versions that are no longer used are ignored.
 
 ## Value
 
-An object of class `"missBART"`, see [`missBART1()`](missBART.md).
+An object of class `"missBART"`, see
+[`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md).
 
 ## Examples
 

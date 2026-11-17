@@ -1,8 +1,11 @@
 # missBART: joint models for non-ignorable missing responses using BART
 
-The main functions are [`missBART1()`](missBART.md),
-[`missBART2()`](missBART.md) and [`mvBART()`](mvBART.md). See Goh, Soh,
-Parnell and Murphy (2024) <doi:10.48550/arXiv.2412.14946>.
+The main functions are
+[`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md),
+[`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+and
+[`mvBART()`](https://andrewcparnell.github.io/missBART/reference/mvBART.md).
+See Goh, Soh, Parnell and Murphy (2024) <doi:10.48550/arXiv.2412.14946>.
 
 ## See also
 

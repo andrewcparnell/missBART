@@ -56,6 +56,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="missbart">missBART<a class="anchor" aria-label="anchor" href="#missbart"></a>
 </h1></div>
+<p><strong>Website and documentation: <a href="https://andrewcparnell.github.io/missBART/" class="uri">https://andrewcparnell.github.io/missBART/</a></strong></p>
 <p>Joint models for multivariate responses with non-ignorable missing values, built on Bayesian additive regression trees (BART).</p>
 <p>The responses follow a multivariate BART model. The missingness indicators follow a model in which the responses themselves are predictors, so that data missing completely at random, missing at random and missing not at random (MNAR) can all be handled, and the missing responses are imputed while the model is fitted:</p>
 <table class="table">
@@ -121,7 +122,7 @@
 <span><span class="va">y_complete</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/imputed_values.html">completed_data</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span>                   <span class="co"># probit coefficients: is the missingness driven by y?</span></span>
 <span><span class="fu"><a href="reference/varimp.html">varimp</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span>                 <span class="co"># which predictors the missingness trees split on</span></span></code></pre></div>
-<p><code><a href="articles/missBART.html">vignette("missBART")</a></code> has a longer walk-through, and the package website (built into <code>docs/</code>) has further articles, including a re-run of the simulation studies in the paper. Scripts for the simulations and the application in the paper are in <a href="Examples"><code>Examples/</code></a>.</p>
+<p><code><a href="articles/missBART.html">vignette("missBART")</a></code> has a longer walk-through, and the <a href="https://andrewcparnell.github.io/missBART/">package website</a> has further articles, including a re-run of the simulation studies in the paper. Scripts for the simulations and the application in the paper are in <a href="Examples"><code>Examples/</code></a>.</p>
 </div>
 <div class="section level2">
 <h2 id="speed">Speed<a class="anchor" aria-label="anchor" href="#speed"></a>

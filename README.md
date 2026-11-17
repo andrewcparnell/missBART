@@ -1,5 +1,7 @@
 # missBART
 
+**Website and documentation: <https://andrewcparnell.github.io/missBART/>**
+
 Joint models for multivariate responses with non-ignorable missing values,
 built on Bayesian additive regression trees (BART).
 
@@ -59,7 +61,7 @@ coef(fit1)                   # probit coefficients: is the missingness driven by
 varimp(fit2)                 # which predictors the missingness trees split on
 ```
 
-`vignette("missBART")` has a longer walk-through, and the package website (built into `docs/`) has further articles, including a re-run of the simulation studies in the paper. Scripts for the
+`vignette("missBART")` has a longer walk-through, and the [package website](https://andrewcparnell.github.io/missBART/) has further articles, including a re-run of the simulation studies in the paper. Scripts for the
 simulations and the application in the paper are in [`Examples/`](Examples).
 
 ## Speed

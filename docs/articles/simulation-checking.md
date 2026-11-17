@@ -2,10 +2,10 @@
 
 The samplers in **missBART** were rewritten in C++ for version 0.2.0,
 and a few steps were corrected along the way (see the
-[changelog](../news/index.md)). This article re-runs the simulation
-studies of Goh, Soh, Parnell and Murphy (2024,
-[arXiv:2412.14946](https://arxiv.org/abs/2412.14946)) with the new code
-and compares the results with those reported in the paper.
+[changelog](https://andrewcparnell.github.io/missBART/news/index.md)).
+This article re-runs the simulation studies of Goh, Soh, Parnell and
+Murphy (2024, [arXiv:2412.14946](https://arxiv.org/abs/2412.14946)) with
+the new code and compares the results with those reported in the paper.
 
 ## What was run
 
@@ -189,5 +189,6 @@ of this size takes hours.
 The C++ samplers reproduce the simulation results of the paper to within
 the accuracy with which they can be read from its figures, and the
 conclusions of its simulation studies hold. The [real data
-article](global-amax.md) looks at the application in the paper, where
-the picture for `missBART1` is less clear-cut.
+article](https://andrewcparnell.github.io/missBART/articles/global-amax.md)
+looks at the application in the paper, where the picture for `missBART1`
+is less clear-cut.

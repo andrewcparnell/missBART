@@ -10,14 +10,15 @@ recorded can depend on the value itself. The responses follow a
 multivariate BART model. The missingness indicators follow either
 
 - a multivariate probit regression on the covariates and the responses
-  ([`missBART1()`](../reference/missBART.md)), or
+  ([`missBART1()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)),
+  or
 - a multivariate probit BART model on the covariates and the responses
-  ([`missBART2()`](../reference/missBART.md)).
+  ([`missBART2()`](https://andrewcparnell.github.io/missBART/reference/missBART.md)).
 
 The missing responses are imputed while the model is fitted.
-[`mvBART()`](../reference/mvBART.md) fits the multivariate BART model on
-its own to complete responses. The models are described in Goh, Soh,
-Parnell and Murphy (2024),
+[`mvBART()`](https://andrewcparnell.github.io/missBART/reference/mvBART.md)
+fits the multivariate BART model on its own to complete responses. The
+models are described in Goh, Soh, Parnell and Murphy (2024),
 [arXiv:2412.14946](https://arxiv.org/abs/2412.14946).
 
 ## Simulated data
@@ -66,10 +67,10 @@ fit1
 #> Tree acceptance rate: regression 0.064
 ```
 
-[`imputed_values()`](../reference/imputed_values.md) summarises the
-posterior of every missing response, and
-[`completed_data()`](../reference/imputed_values.md) fills in their
-posterior means.
+[`imputed_values()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md)
+summarises the posterior of every missing response, and
+[`completed_data()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md)
+fills in their posterior means.
 
 ``` r
 imp1 <- imputed_values(fit1)
@@ -149,9 +150,10 @@ fit2
 ```
 
 There are no coefficients to inspect here. Instead,
-[`varimp()`](../reference/varimp.md) reports how often each predictor is
-used in the splitting rules of the missingness trees. Splits
-concentrated on the responses point towards MNAR data.
+[`varimp()`](https://andrewcparnell.github.io/missBART/reference/varimp.md)
+reports how often each predictor is used in the splitting rules of the
+missingness trees. Splits concentrated on the responses point towards
+MNAR data.
 
 ``` r
 barplot(varimp(fit2), ylab = "Proportion of splitting rules")
@@ -182,12 +184,13 @@ c(complete_cases = rmse(pred0[fit1$missing_index], truth),
 ## What is in a fit
 
 A fit is a list of posterior draws, one list element per kept iteration;
-see [`?missBART1`](../reference/missBART.md) for all components. For
-example, `y_post` holds the BART mean function, `y_pred` posterior
-predictive draws, `y_impute` the imputed values (ordered as
-`which(is.na(y))`), `sigma_post` the residual covariance matrix and, if
-`x_predict` is supplied, `new_y_hat` and `new_y_post` the mean function
-and predictive draws for new covariates.
+see
+[`?missBART1`](https://andrewcparnell.github.io/missBART/reference/missBART.md)
+for all components. For example, `y_post` holds the BART mean function,
+`y_pred` posterior predictive draws, `y_impute` the imputed values
+(ordered as `which(is.na(y))`), `sigma_post` the residual covariance
+matrix and, if `x_predict` is supplied, `new_y_hat` and `new_y_post` the
+mean function and predictive draws for new covariates.
 
 ``` r
 round(Reduce("+", fit1$sigma_post) / length(fit1$sigma_post), 2)
