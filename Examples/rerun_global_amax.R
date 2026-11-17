@@ -56,13 +56,14 @@ fit_model <- function(model, seed) {
   }))
   plot_data$response <- factor(plot_data$response, levels = colnames(y))
   rug <- data.frame(response = imp$column, imputed = imp$mean)
-  fig <- ggplot(plot_data, aes(fitted, observed)) +
+  # predictions (with their intervals) on the vertical axis, data on the horizontal axis
+  fig <- ggplot(plot_data, aes(observed, fitted)) +
     geom_errorbar(aes(ymin = lower, ymax = upper), colour = "grey75", linewidth = 0.2) +
     geom_point(size = 0.4, colour = "#1A9993") +
     geom_abline(linewidth = 0.3) +
     geom_rug(data = rug, aes(y = imputed), inherit.aes = FALSE, sides = "l", colour = "#FD7446", alpha = 0.3) +
     facet_wrap(~response, scales = "free", nrow = 1) +
-    labs(x = "Posterior mean prediction", y = "Observed (log scale)", title = model) +
+    labs(x = "Observed (log scale)", y = "Predicted (log scale)", title = model) +
     theme_bw()
   if(seed == 1) ggsave(file.path("vignettes/articles/figures", paste0("amax_", model, ".png")), fig, width = 12, height = 3, dpi = 110)
   list(model = model, seed = seed, seconds = time, per_response = per_response, tree_accept = fit$tree_accept,

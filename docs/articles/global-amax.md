@@ -52,9 +52,15 @@ time).
 
 ## Fit to the observed responses
 
-Posterior mean predictions against the observed values, with 95%
-prediction intervals. The rug on the vertical axis shows the posterior
-means of the imputed values. These correspond to Figure 5 of the paper.
+Each point is one observed response: its observed value is on the
+horizontal axis and the posterior mean prediction of the model is on the
+vertical axis. The grey vertical bars are the 95% prediction intervals,
+so a point is covered when its bar crosses the diagonal line. The orange
+rug on the vertical axis shows the posterior means of the imputed values
+for the missing responses, which have no observed value to plot them
+against. The points fall in horizontal bands because plants measured at
+the same site share the same covariates, and so the same prediction.
+These plots correspond to Figure 5 of the paper, with the axes swapped.
 
 ![](figures/amax_missBART1.png)![](figures/amax_missBART2.png)
 
