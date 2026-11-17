@@ -98,6 +98,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// forest_predict_cpp
+arma::cube forest_predict_cpp(const List& trees, const arma::mat& X, int p);
+RcppExport SEXP _missBART_forest_predict_cpp(SEXP treesSEXP, SEXP XSEXP, SEXP pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List& >::type trees(treesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    rcpp_result_gen = Rcpp::wrap(forest_predict_cpp(trees, X, p));
+    return rcpp_result_gen;
+END_RCPP
+}
+// forest_pdp_cpp
+List forest_pdp_cpp(const List& trees, const arma::mat& X, int col, const arma::vec& grid, int p, const arma::vec& offset, bool probit);
+RcppExport SEXP _missBART_forest_pdp_cpp(SEXP treesSEXP, SEXP XSEXP, SEXP colSEXP, SEXP gridSEXP, SEXP pSEXP, SEXP offsetSEXP, SEXP probitSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List& >::type trees(treesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type col(colSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type grid(gridSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< bool >::type probit(probitSEXP);
+    rcpp_result_gen = Rcpp::wrap(forest_pdp_cpp(trees, X, col, grid, p, offset, probit));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_missBART_missbart_cpp", (DL_FUNC) &_missBART_missbart_cpp, 6},
@@ -106,6 +136,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_missBART_descend_cpp", (DL_FUNC) &_missBART_descend_cpp, 5},
     {"_missBART_leaf_loglik_cpp", (DL_FUNC) &_missBART_leaf_loglik_cpp, 5},
     {"_missBART_draw_ymis_cpp", (DL_FUNC) &_missBART_draw_ymis_cpp, 5},
+    {"_missBART_forest_predict_cpp", (DL_FUNC) &_missBART_forest_predict_cpp, 3},
+    {"_missBART_forest_pdp_cpp", (DL_FUNC) &_missBART_forest_pdp_cpp, 7},
     {NULL, NULL, 0}
 };
 

@@ -25,3 +25,11 @@
     .Call(`_missBART_draw_ymis_cpp`, y, m, Q, b, conditional)
 }
 
+.forest_predict_cpp <- function(trees, X, p) {
+    .Call(`_missBART_forest_predict_cpp`, trees, X, p)
+}
+
+.forest_pdp_cpp <- function(trees, X, col, grid, p, offset, probit) {
+    .Call(`_missBART_forest_pdp_cpp`, trees, X, col, grid, p, offset, probit)
+}
+

@@ -19,6 +19,9 @@ mvBART(
   show_progress = TRUE,
   progress_every = 10,
   save_y_pred = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 }
@@ -63,6 +66,16 @@ else is returned on the original scale.}
 
 \item{save_y_pred}{logical. Keep posterior predictive draws for the
 training data (\code{y_pred})?}
+
+\item{keep_trees}{logical. Keep the trees of every posterior sample? This
+is needed for \link[=predict.missBART]{predict()} at new covariates,
+\code{\link[=partial_dependence]{partial_dependence()}} and \code{\link[=interactions]{interactions()}}, and can take a lot of memory.}
+
+\item{n_chains}{number of chains to run from different starting values. The
+samples of all chains are returned together, with \code{chain} giving the
+chain of each sample; see \code{\link[=chain_diagnostics]{chain_diagnostics()}}.}
+
+\item{cores}{number of chains to run in parallel (not on Windows).}
 
 \item{...}{further arguments passed to \code{\link[=tree_list]{tree_list()}} and \code{\link[=hypers_list]{hypers_list()}}.
 Arguments of earlier versions that are no longer used are ignored.}

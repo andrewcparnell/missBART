@@ -6,5 +6,6 @@
 #' @useDynLib missBART, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom stats fitted predict coef
+#' @importFrom graphics plot
 #' @keywords internal
 "_PACKAGE"

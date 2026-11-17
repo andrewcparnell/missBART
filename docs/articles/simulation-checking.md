@@ -42,6 +42,24 @@ in total, or about 7 minutes on 60 cores.
 
 ![](simulation-checking_files/figure-html/fig1-1.png)
 
+All four panels share one logarithmic axis. The means and standard
+deviations over the four folds are:
+
+| cells | scenario | missBART1 | missBART2 | mvBART_cc | mvBART_imp | uni_missBART1 | uni_missBART2 | uniBART_cc | uniBART_imp |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| missing | MAR_1 | 23.4 (1.1) | 23.3 (1.3) | 22.8 (1.0) | 26.3 (1.9) | 23.5 (1.2) | 24.1 (1.9) | 23.3 (0.9) | 26.2 (1.5) |
+| observed | MAR_1 | 23.5 (0.8) | 23.3 (0.7) | 23.5 (0.8) | 23.7 (0.7) | 23.6 (1.0) | 23.7 (0.7) | 23.5 (1.1) | 23.8 (0.7) |
+| combined | MAR_1 | 33.2 (0.4) | 33.0 (0.6) | 32.7 (0.8) | 35.5 (1.6) | 33.4 (0.8) | 33.8 (1.3) | 33.1 (0.7) | 35.4 (1.3) |
+| missing | MAR_2 | 13.1 (1.4) | 12.4 (1.4) | 12.7 (1.4) | 12.3 (1.4) | 13.4 (1.3) | 12.5 (1.4) | 12.5 (1.4) | 12.4 (1.4) |
+| observed | MAR_2 | 28.0 (0.7) | 28.1 (0.9) | 28.5 (0.4) | 27.8 (0.4) | 28.1 (1.0) | 28.0 (0.6) | 27.8 (0.9) | 28.0 (0.9) |
+| combined | MAR_2 | 30.9 (1.1) | 30.7 (1.2) | 31.3 (0.9) | 30.4 (0.6) | 31.2 (1.3) | 30.7 (0.9) | 30.5 (1.2) | 30.6 (1.1) |
+| missing | MNAR_1 | 19.2 (1.1) | 18.8 (0.9) | 25.3 (0.8) | 31.7 (0.5) | 19.6 (0.8) | 19.7 (1.1) | 21.8 (1.1) | 31.4 (0.4) |
+| observed | MNAR_1 | 24.7 (1.1) | 25.8 (1.1) | 43.0 (2.2) | 25.2 (0.7) | 25.2 (1.0) | 24.9 (1.5) | 24.7 (1.0) | 25.2 (0.6) |
+| combined | MNAR_1 | 31.3 (0.4) | 31.9 (0.7) | 49.9 (1.9) | 40.4 (0.8) | 32.0 (0.5) | 31.8 (0.8) | 33.0 (0.5) | 40.2 (0.6) |
+| missing | MNAR_2 | 21.9 (1.6) | 18.9 (1.1) | 36.7 (2.8) | 54.7 (2.6) | 22.0 (1.2) | 20.4 (1.5) | 29.2 (2.3) | 54.5 (2.9) |
+| observed | MNAR_2 | 24.2 (0.6) | 24.5 (0.6) | 39.7 (2.4) | 25.4 (1.1) | 24.6 (0.3) | 24.8 (0.3) | 24.0 (0.9) | 25.7 (0.4) |
+| combined | MNAR_2 | 32.6 (1.2) | 30.9 (0.9) | 54.1 (3.7) | 60.4 (2.1) | 33.0 (0.7) | 32.1 (1.1) | 37.8 (1.4) | 60.3 (2.6) |
+
 The table compares the median over folds with the value read off Figure
 1 of the paper. The paper only reports these results as box plots, so
 the paper values were read by eye and are accurate to about half a unit.
@@ -108,6 +126,14 @@ under MNAR 2.
 
 ![](simulation-checking_files/figure-html/fig4-1.png)
 
+Means and standard deviations over the eight folds:
+
+| cells | scenario | missBART1 | missBART2 | mvBART_cc | mvBART_imp | uni_missBART1 | uni_missBART2 | uniBART_cc | uniBART_imp | missBART2_impX |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| combined | MNAR_amp0 | 30.4 (0.8) | 30.5 (0.9) | 51.4 (2.1) | 36.9 (1.0) | 51.3 (1.5) | 36.3 (1.2) | 37.8 (1.1) | 36.8 (1.0) | – |
+| combined | MNAR_amp1 | 30.7 (0.8) | 32.1 (0.8) | 51.9 (2.0) | 37.9 (0.7) | 48.6 (6.6) | 37.0 (0.8) | 38.6 (0.7) | 37.7 (0.7) | 30.8 (0.7) |
+| combined | MNAR_amp2 | 31.8 (1.0) | 36.4 (1.2) | 54.4 (2.1) | 41.1 (1.0) | 48.3 (1.1) | 42.0 (1.0) | 42.9 (1.1) | 41.0 (1.0) | 31.9 (0.9) |
+
 | scenario | cells | source | missBART1 | missBART2 | missBART2_impX | mvBART_cc | mvBART_imp | uni_missBART1 | uni_missBART2 | uniBART_cc | uniBART_imp |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | MNAR_amp0 | combined | paper | 30.5 | 30.5 | – | 52.0 | 37.0 | 49.0 | 36.5 | 38.0 | 37.0 |
@@ -121,6 +147,25 @@ Again the agreement is close: the joint multivariate models are clearly
 best, and covariate imputation helps `missBART2` when many covariates
 are missing (MNAR_amp2). `missBART1` does a little better than in the
 paper in MNAR_amp2, and `uni_missBART1` a little worse.
+
+### Missingness model or handling of missing covariates?
+
+Three of the models differ in only one respect at a time, which
+separates two questions. `missBART1` and `missBART2_impX` both use
+covariates imputed beforehand and differ only in the missingness model
+(probit regression or probit BART). `missBART2_impX` and `missBART2`
+share the missingness model and differ only in how missing covariates
+are handled (imputed beforehand, or handled inside the trees).
+
+| scenario | missBART1 (imputed X) | missBART2 (imputed X) | missBART2 (missing X in trees) |
+|:---|---:|---:|---:|
+| MNAR_amp1 | 30.7 | 30.8 | 32.1 |
+| MNAR_amp2 | 31.8 | 31.9 | 36.4 |
+
+In these scenarios, where the missingness was generated from a probit
+regression, the choice of missingness model makes little difference, and
+imputing the covariates first does better than handling them inside the
+trees, clearly so when many covariates are missing (MNAR_amp2).
 
 ## Univariate examples (Appendix D)
 

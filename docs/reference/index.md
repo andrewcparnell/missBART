@@ -17,6 +17,7 @@ Fit the joint models, or multivariate BART on its own.
   [`summary(`*`<missBART>`*`)`](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
   [`fitted(`*`<missBART>`*`)`](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
   [`predict(`*`<missBART>`*`)`](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
+  [`plot(`*`<missBART>`*`)`](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
   [`coef(`*`<missBART>`*`)`](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
   : Methods for missBART fits
 - [`imputed_values()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md)
@@ -24,6 +25,13 @@ Fit the joint models, or multivariate BART on its own.
   : Summaries of the imputed responses
 - [`varimp()`](https://andrewcparnell.github.io/missBART/reference/varimp.md)
   : Variable importance
+- [`partial_dependence()`](https://andrewcparnell.github.io/missBART/reference/partial_dependence.md)
+  [`plot(`*`<missBART_pdp>`*`)`](https://andrewcparnell.github.io/missBART/reference/partial_dependence.md)
+  : Partial dependence and individual conditional expectation curves
+- [`interactions()`](https://andrewcparnell.github.io/missBART/reference/interactions.md)
+  : Variable interactions
+- [`chain_diagnostics()`](https://andrewcparnell.github.io/missBART/reference/chain_diagnostics.md)
+  : Agreement between chains
 
 ## Priors and settings
 

@@ -30,6 +30,9 @@ missBART1(
   probit_prior = probit_prior_list(),
   save_y_pred = TRUE,
   save_z = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 
@@ -56,6 +59,9 @@ missBARTprobit(
   probit_prior = probit_prior_list(),
   save_y_pred = TRUE,
   save_z = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 
@@ -83,6 +89,9 @@ missBART2(
   ymis_update = c("conditional", "marginal"),
   save_y_pred = TRUE,
   save_z = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 }
@@ -159,6 +168,16 @@ training data (\code{y_pred})?}
 \item{save_z}{logical. Keep the draws of the latent probit variables
 (\code{z_post})?}
 
+\item{keep_trees}{logical. Keep the trees of every posterior sample? This
+is needed for \link[=predict.missBART]{predict()} at new covariates,
+\code{\link[=partial_dependence]{partial_dependence()}} and \code{\link[=interactions]{interactions()}}, and can take a lot of memory.}
+
+\item{n_chains}{number of chains to run from different starting values. The
+samples of all chains are returned together, with \code{chain} giving the
+chain of each sample; see \code{\link[=chain_diagnostics]{chain_diagnostics()}}.}
+
+\item{cores}{number of chains to run in parallel (not on Windows).}
+
 \item{...}{further arguments passed to \code{\link[=tree_list]{tree_list()}} and \code{\link[=hypers_list]{hypers_list()}}.
 Arguments of earlier versions that are no longer used are ignored.}
 
@@ -191,10 +210,17 @@ responses).}
 \item{y_miss_accept}{\code{missBART2()} only: Metropolis-Hastings acceptance
 rate for each missing value.}
 \item{tree_accept}{acceptance rates of the tree proposals.}
+\item{reg_trees, class_trees}{if \code{keep_trees = TRUE}, the regression and
+missingness trees of every sample: a matrix with one row per node giving
+the tree, the row of the left child (0 for a terminal node; the right
+child is the next row), the splitting variable and value, whether missing
+covariate values go left, and the terminal node parameters.}
+\item{chain}{the chain each sample came from.}
 }
 Use \link[=fitted.missBART]{fitted()}, \link[=predict.missBART]{predict()},
-\code{\link[=imputed_values]{imputed_values()}}, \code{\link[=completed_data]{completed_data()}}, \link[=coef.missBART]{coef()} and
-\code{\link[=varimp]{varimp()}} to summarise a fit.
+\link[=plot.missBART]{plot()}, \code{\link[=imputed_values]{imputed_values()}}, \code{\link[=completed_data]{completed_data()}},
+\link[=coef.missBART]{coef()}, \code{\link[=varimp]{varimp()}}, \code{\link[=partial_dependence]{partial_dependence()}},
+\code{\link[=interactions]{interactions()}} and \code{\link[=chain_diagnostics]{chain_diagnostics()}} to summarise a fit.
 }
 \description{
 \code{missBART1()} and \code{missBART2()} fit the two selection models of Goh, Soh,

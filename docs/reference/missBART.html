@@ -83,6 +83,9 @@ model on <code>(x, y)</code>. Missing responses are imputed within the sampler.
 <span>  probit_prior <span class="op">=</span> <span class="fu"><a href="probit_prior_list.html">probit_prior_list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  save_y_pred <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  save_z <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep_trees <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_chains <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -109,6 +112,9 @@ model on <code>(x, y)</code>. Missing responses are imputed within the sampler.
 <span>  probit_prior <span class="op">=</span> <span class="fu"><a href="probit_prior_list.html">probit_prior_list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  save_y_pred <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  save_z <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep_trees <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_chains <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -136,6 +142,9 @@ model on <code>(x, y)</code>. Missing responses are imputed within the sampler.
 <span>  ymis_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditional"</span>, <span class="st">"marginal"</span><span class="op">)</span>,</span>
 <span>  save_y_pred <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  save_z <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep_trees <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_chains <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -256,6 +265,22 @@ training data (<code>y_pred</code>)?</p></dd>
 (<code>z_post</code>)?</p></dd>
 
 
+<dt id="arg-keep-trees">keep_trees<a class="anchor" aria-label="anchor" href="#arg-keep-trees"></a></dt>
+<dd><p>logical. Keep the trees of every posterior sample? This
+is needed for <a href="missBART-methods.html">predict()</a> at new covariates,
+<code><a href="partial_dependence.html">partial_dependence()</a></code> and <code><a href="interactions.html">interactions()</a></code>, and can take a lot of memory.</p></dd>
+
+
+<dt id="arg-n-chains">n_chains<a class="anchor" aria-label="anchor" href="#arg-n-chains"></a></dt>
+<dd><p>number of chains to run from different starting values. The
+samples of all chains are returned together, with <code>chain</code> giving the
+chain of each sample; see <code><a href="chain_diagnostics.html">chain_diagnostics()</a></code>.</p></dd>
+
+
+<dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
+<dd><p>number of chains to run in parallel (not on Windows).</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>further arguments passed to <code><a href="tree_list.html">tree_list()</a></code> and <code><a href="hypers_list.html">hypers_list()</a></code>.
 Arguments of earlier versions that are no longer used are ignored.</p></dd>
@@ -315,10 +340,21 @@ rate for each missing value.</p></dd>
 <dt>tree_accept</dt>
 <dd><p>acceptance rates of the tree proposals.</p></dd>
 
+<dt>reg_trees, class_trees</dt>
+<dd><p>if <code>keep_trees = TRUE</code>, the regression and
+missingness trees of every sample: a matrix with one row per node giving
+the tree, the row of the left child (0 for a terminal node; the right
+child is the next row), the splitting variable and value, whether missing
+covariate values go left, and the terminal node parameters.</p></dd>
+
+<dt>chain</dt>
+<dd><p>the chain each sample came from.</p></dd>
+
 
 </dl><p>Use <a href="missBART-methods.html">fitted()</a>, <a href="missBART-methods.html">predict()</a>,
-<code><a href="imputed_values.html">imputed_values()</a></code>, <code><a href="imputed_values.html">completed_data()</a></code>, <a href="missBART-methods.html">coef()</a> and
-<code><a href="varimp.html">varimp()</a></code> to summarise a fit.</p>
+<a href="missBART-methods.html">plot()</a>, <code><a href="imputed_values.html">imputed_values()</a></code>, <code><a href="imputed_values.html">completed_data()</a></code>,
+<a href="missBART-methods.html">coef()</a>, <code><a href="varimp.html">varimp()</a></code>, <code><a href="partial_dependence.html">partial_dependence()</a></code>,
+<code><a href="interactions.html">interactions()</a></code> and <code><a href="chain_diagnostics.html">chain_diagnostics()</a></code> to summarise a fit.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

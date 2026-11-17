@@ -27,6 +27,9 @@ reference:
   - missBART-methods
   - imputed_values
   - varimp
+  - partial_dependence
+  - interactions
+  - chain_diagnostics
 - title: Priors and settings
   contents:
   - hypers_list

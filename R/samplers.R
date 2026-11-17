@@ -63,6 +63,13 @@
 #'   training data (`y_pred`)?
 #' @param save_z logical. Keep the draws of the latent probit variables
 #'   (`z_post`)?
+#' @param keep_trees logical. Keep the trees of every posterior sample? This
+#'   is needed for [predict()][predict.missBART] at new covariates,
+#'   [partial_dependence()] and [interactions()], and can take a lot of memory.
+#' @param n_chains number of chains to run from different starting values. The
+#'   samples of all chains are returned together, with `chain` giving the
+#'   chain of each sample; see [chain_diagnostics()].
+#' @param cores number of chains to run in parallel (not on Windows).
 #' @param ... further arguments passed to [tree_list()] and [hypers_list()].
 #'   Arguments of earlier versions that are no longer used are ignored.
 #'
@@ -113,10 +120,17 @@
 #' \item{y_miss_accept}{`missBART2()` only: Metropolis-Hastings acceptance
 #'   rate for each missing value.}
 #' \item{tree_accept}{acceptance rates of the tree proposals.}
+#' \item{reg_trees, class_trees}{if `keep_trees = TRUE`, the regression and
+#'   missingness trees of every sample: a matrix with one row per node giving
+#'   the tree, the row of the left child (0 for a terminal node; the right
+#'   child is the next row), the splitting variable and value, whether missing
+#'   covariate values go left, and the terminal node parameters.}
+#' \item{chain}{the chain each sample came from.}
 #' }
 #' Use [fitted()][fitted.missBART], [predict()][predict.missBART],
-#' [imputed_values()], [completed_data()], [coef()][coef.missBART] and
-#' [varimp()] to summarise a fit.
+#' [plot()][plot.missBART], [imputed_values()], [completed_data()],
+#' [coef()][coef.missBART], [varimp()], [partial_dependence()],
+#' [interactions()] and [chain_diagnostics()] to summarise a fit.
 #'
 #' @references Chipman, H. A., George, E. I. and McCulloch, R. E. (2010). BART:
 #'   Bayesian additive regression trees. *The Annals of Applied Statistics*,
@@ -161,14 +175,16 @@ missBART1 <- function(x, y, x_predict = NULL, n_trees = 100, burn = 1000, iters 
                       scale = "center", include_x = TRUE, include_y = TRUE, show_progress = TRUE,
                       progress_every = 10, pdp_range = NULL, make_pdp = FALSE,
                       mice_impute = TRUE, ymis_update = c("conditional", "marginal"),
-                      probit_prior = probit_prior_list(), save_y_pred = TRUE, save_z = TRUE, ...) {
+                      probit_prior = probit_prior_list(), save_y_pred = TRUE, save_z = TRUE,
+                      keep_trees = FALSE, n_chains = 1, cores = 1, ...) {
   fit_missbart(model = 1L, x = x, y = y, x_predict = x_predict, n_reg_trees = n_trees,
                n_class_trees = 0L, burn = burn, iters = iters, thin = thin, predict = predict,
                tree_prior_params = tree_prior_params, hypers = hypers, scale = scale,
                include_x = include_x, include_y = include_y, show_progress = show_progress,
                progress_every = progress_every, mice_impute = mice_impute,
                ymis_update = match.arg(ymis_update), probit_prior = probit_prior,
-               save_y_pred = save_y_pred, save_z = save_z, call = match.call())
+               save_y_pred = save_y_pred, save_z = save_z, keep_trees = keep_trees,
+               n_chains = n_chains, cores = cores, call = match.call())
 }
 
 #' @rdname missBART
@@ -183,7 +199,7 @@ missBART2 <- function(x, y, x_predict = NULL, n_reg_trees = 100, n_class_trees =
                       include_x = TRUE, include_y = TRUE, show_progress = TRUE, progress_every = 10,
                       pdp_range = NULL, make_pdp = FALSE, mice_impute = TRUE,
                       ymis_update = c("conditional", "marginal"), save_y_pred = TRUE,
-                      save_z = TRUE, ...) {
+                      save_z = TRUE, keep_trees = FALSE, n_chains = 1, cores = 1, ...) {
   if(!include_x && !include_y) stop("At least one of include_x and include_y must be TRUE")
   fit_missbart(model = 2L, x = x, y = y, x_predict = x_predict, n_reg_trees = n_reg_trees,
                n_class_trees = n_class_trees, burn = burn, iters = iters, thin = thin,
@@ -192,7 +208,8 @@ missBART2 <- function(x, y, x_predict = NULL, n_reg_trees = 100, n_class_trees =
                show_progress = show_progress, progress_every = progress_every,
                mice_impute = mice_impute, ymis_update = match.arg(ymis_update), MH_sd = MH_sd,
                pdp_range = pdp_range, make_pdp = make_pdp, save_y_pred = save_y_pred,
-               save_z = save_z, call = match.call())
+               save_z = save_z, keep_trees = keep_trees, n_chains = n_chains, cores = cores,
+               call = match.call())
 }
 
 #' Multivariate BART for complete responses
@@ -215,13 +232,15 @@ missBART2 <- function(x, y, x_predict = NULL, n_reg_trees = 100, n_class_trees =
 #' plot(data$mean[, 1], fitted(fit)[, 1])
 mvBART <- function(x, y, x_predict = NULL, n_trees = 100, burn = 1000, iters = 1000, thin = 2,
                    predict = TRUE, tree_prior_params = tree_list(...), hypers = hypers_list(...),
-                   scale = "center", show_progress = TRUE, progress_every = 10, save_y_pred = TRUE, ...) {
+                   scale = "center", show_progress = TRUE, progress_every = 10, save_y_pred = TRUE,
+                   keep_trees = FALSE, n_chains = 1, cores = 1, ...) {
   if(anyNA(y)) stop("mvBART needs complete responses; use missBART1() or missBART2() when y has missing values")
   fit_missbart(model = 0L, x = x, y = y, x_predict = x_predict, n_reg_trees = n_trees,
                n_class_trees = 0L, burn = burn, iters = iters, thin = thin, predict = predict,
                tree_prior_params = tree_prior_params, hypers = hypers, scale = scale,
                show_progress = show_progress, progress_every = progress_every,
-               mice_impute = FALSE, save_y_pred = save_y_pred, call = match.call())
+               mice_impute = FALSE, save_y_pred = save_y_pred, keep_trees = keep_trees,
+               n_chains = n_chains, cores = cores, call = match.call())
 }
 
 as_numeric_matrix <- function(a, name) {
@@ -240,7 +259,7 @@ fit_missbart <- function(model, x, y, x_predict, n_reg_trees, n_class_trees, bur
                          include_y = TRUE, show_progress, progress_every, mice_impute,
                          ymis_update = "conditional", probit_prior = probit_prior_list(),
                          MH_sd = NULL, pdp_range = NULL, make_pdp = FALSE,
-                         save_y_pred = TRUE, save_z = FALSE, call) {
+                         save_y_pred = TRUE, save_z = FALSE, keep_trees = FALSE, n_chains = 1, cores = 1, call) {
   y <- as_numeric_matrix(y, "y")
   x <- as_numeric_matrix(x, "x")
   n <- nrow(y)
@@ -286,7 +305,8 @@ fit_missbart <- function(model, x, y, x_predict, n_reg_trees, n_class_trees, bur
   }
   y <- sweep(sweep(y, 2, center_y, "-"), 2, rng_y, "/")
   names(center_y) <- colnames(y)
-  min_x <- max_x <- NULL
+  min_x <- max_x <- rng_x <- NULL
+  na_cols <- integer(0)
   if(model == 1L) {
     if(anyNA(x) || anyNA(x_predict)) stop("missBART1 needs complete covariates: impute x first, or use missBART2()")
     if(scale != "none") {
@@ -325,33 +345,13 @@ fit_missbart <- function(model, x, y, x_predict, n_reg_trees, n_class_trees, bur
     if(!is.matrix(hypers$V) || any(dim(hypers$V) != p)) stop("hypers$V must be a p x p matrix")
     Vinv <- solve(hypers$V)
   }
-  omega_init <- stats::rgamma(p, shape = nu / 2, rate = nu * lambda / 2)
-
-  #-- starting values for the missing responses
-  y_init <- y
-  if(length(missing_index) > 0) {
-    y_init[missing_index] <- 0
-    if(mice_impute) {
-      dat <- as.data.frame(cbind(y, x))
-      names(dat) <- paste0("V", seq_len(ncol(dat)))
-      imputed <- tryCatch(as.matrix(mice::complete(mice::mice(dat, printFlag = FALSE)))[, seq_len(p), drop = FALSE],
-                          error = function(e) NULL)
-      if(is.null(imputed)) {
-        warning("mice imputation failed; missing responses start at the centre of the observed range")
-      } else {
-        ok <- missing_index[!is.na(imputed[missing_index])]
-        y_init[ok] <- imputed[ok]
-      }
-    }
-  }
-
   pp <- probit_prior
   if(is.null(pdp_range)) pdp_range <- c(min_y[1], max_y[1])
   pdp_grid <- seq(pdp_range[1], pdp_range[2], length.out = if(include_x) 20 else 50)
   ctrl <- list(n_reg_trees = n_reg_trees, n_class_trees = as.integer(n_class_trees),
                burn = as.integer(burn), iters = as.integer(iters), thin = as.integer(thin),
                kappa = kappa, kappa_class = 4 / 9 * max(n_class_trees, 1),
-               mu0 = rep_len(hypers$mu0, p), wish_df = alpha, Vinv = Vinv, omega_init = omega_init,
+               mu0 = rep_len(hypers$mu0, p), wish_df = alpha, Vinv = Vinv,
                prior_alpha = tree_prior_params$prior_alpha, prior_beta = tree_prior_params$prior_beta,
                min_node = as.integer(max(tree_prior_params$min_node, p + 1)),
                max_attempt = as.integer(max(tree_prior_params$max_attempt, 1)),
@@ -363,12 +363,51 @@ fit_missbart <- function(model, x, y, x_predict, n_reg_trees, n_class_trees, bur
                a0 = pp$a0, b0 = pp$b0,
                ax = if(is.null(pp$ax)) q + 1 else pp$ax, bx = if(is.null(pp$bx)) p + q + 1 else pp$bx,
                ay = if(is.null(pp$ay)) 1 else pp$ay, by = if(is.null(pp$by)) 1 else pp$by,
-               save_y_pred = isTRUE(save_y_pred), save_z = isTRUE(save_z),
+               save_y_pred = isTRUE(save_y_pred), save_z = isTRUE(save_z), keep_trees = isTRUE(keep_trees),
                make_pdp = isTRUE(make_pdp),
                pdp_grid = (pdp_grid - center_y[1]) / rng_y[1],
                show_progress = isTRUE(show_progress), progress_every = as.integer(progress_every))
 
-  out <- .missbart_cpp(x, y_init, m, x_predict, as.integer(model), ctrl)
+  #-- one chain: starting values, then the sampler
+  run_chain <- function(seed = NULL) {
+    if(!is.null(seed)) set.seed(seed)
+    ctrl$omega_init <- stats::rgamma(p, shape = nu / 2, rate = nu * lambda / 2)
+    y_init <- y
+    if(length(missing_index) > 0) {
+      y_init[missing_index] <- 0
+      if(mice_impute) {
+        dat <- as.data.frame(cbind(y, x))
+        names(dat) <- paste0("V", seq_len(ncol(dat)))
+        imputed <- tryCatch(as.matrix(mice::complete(mice::mice(dat, printFlag = FALSE)))[, seq_len(p), drop = FALSE],
+                            error = function(e) NULL)
+        if(is.null(imputed)) {
+          warning("mice imputation failed; missing responses start at the centre of the observed range")
+        } else {
+          ok <- missing_index[!is.na(imputed[missing_index])]
+          y_init[ok] <- imputed[ok]
+        }
+      }
+    }
+    .missbart_cpp(x, y_init, m, x_predict, as.integer(model), ctrl)
+  }
+
+  n_chains <- as.integer(n_chains)
+  if(is.na(n_chains) || n_chains < 1) stop("n_chains must be a positive whole number")
+  if(n_chains == 1L) {
+    out <- run_chain()
+  } else {
+    seeds <- sample.int(.Machine$integer.max, n_chains)
+    if(cores > 1 && .Platform$OS.type != "windows") {
+      ctrl$show_progress <- FALSE
+      chains <- parallel::mclapply(seeds, run_chain, mc.cores = min(cores, n_chains))
+      failed <- vapply(chains, inherits, logical(1), what = "try-error")
+      if(any(failed)) stop("A chain failed: ", conditionMessage(attr(chains[[which(failed)[1]]], "condition")))
+    } else {
+      chains <- lapply(seeds, run_chain)
+    }
+    out <- combine_chains(chains)
+  }
+  out$chain <- rep(seq_len(n_chains), each = iters)
 
   #-- tidy up
   y_names <- colnames(y)
@@ -395,19 +434,39 @@ fit_missbart <- function(model, x, y, x_predict, n_reg_trees, n_class_trees, bur
       if(!include_y || length(missing_index) == 0) out$y_miss_accept <- NULL
     } else {
       out$y_miss_accept <- out$z_post <- NULL
-      out$tree_accept <- out$tree_accept["regression"]
     }
     out$var_imp_miss <- NULL
   }
-  if(model == 1L) out$tree_accept <- out$tree_accept["regression"]
+  if(model != 2L) {
+    out$tree_accept <- out$tree_accept["regression"]
+    out$class_trees <- NULL
+  }
   if(!ctrl$save_z) out$z_post <- NULL
+  if(!ctrl$keep_trees) out$reg_trees <- out$class_trees <- NULL
   if(length(out$pdp_out) == 0) out$pdp_out <- NA else out$pdp_grid <- pdp_grid
 
   structure(c(out, list(model = c("mvBART", "missBART1", "missBART2")[model + 1L], call = call,
-                        burn = burn, iters = iters, thin = thin, scale = scale,
-                        min_y = min_y, max_y = max_y, center_y = center_y, min_x = min_x, max_x = max_x,
-                        y = y_original, missing_index = missing_index,
+                        burn = burn, iters = iters, thin = thin, n_chains = n_chains, scale = scale,
+                        min_y = min_y, max_y = max_y, center_y = center_y, rng_y = rng_y,
+                        min_x = min_x, max_x = max_x, rng_x = rng_x, na_cols = na_cols,
+                        y = y_original, x = x, missing_index = missing_index,
                         include_x = include_x, include_y = include_y,
-                        kappa = kappa, MH_sd = ctrl$MH_sd)),
+                        kappa = kappa, MH_sd = ctrl$MH_sd, z_offset = ctrl$z_offset)),
             class = "missBART")
+}
+
+# Joins the output of several chains: draws are concatenated, rates averaged.
+combine_chains <- function(chains) {
+  out <- chains[[1]]
+  for(nm in names(out)) {
+    parts <- lapply(chains, `[[`, nm)
+    out[[nm]] <- if(nm %in% c("y_miss_accept", "tree_accept")) {
+      Reduce("+", parts) / length(parts)
+    } else if(is.matrix(out[[nm]])) {
+      do.call(rbind, parts)
+    } else {
+      do.call(c, parts)
+    }
+  }
+  out
 }

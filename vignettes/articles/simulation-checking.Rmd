@@ -78,10 +78,26 @@ computing time in total, or about `r round(sim$settings$minutes)` minutes on 60 
 biv <- long[long$scenario %in% c("MAR_1", "MAR_2", "MNAR_1", "MNAR_2"), ]
 ggplot(biv, aes(cells, frobenius, fill = model)) +
   geom_boxplot(outlier.size = 0.5, linewidth = 0.3) +
-  facet_wrap(~scenario, scales = "free_y") +
+  facet_wrap(~scenario) +
+  scale_y_log10(breaks = c(10, 15, 20, 30, 40, 60)) +
   scale_fill_manual(values = colours, name = NULL) +
-  labs(x = NULL, y = "Out-of-sample Frobenius norm") +
-  theme_bw()
+  labs(x = NULL, y = "Out-of-sample Frobenius norm (log scale)") +
+  theme_bw() + theme(strip.background = element_blank(), panel.grid.minor = element_blank())
+```
+
+All four panels share one logarithmic axis. The means and standard deviations
+over the four folds are:
+
+```{r}
+mean_sd <- function(scenarios, cells) {
+  sub <- long[long$scenario %in% scenarios & long$cells %in% cells, ]
+  sub$model <- droplevels(sub$model)
+  tab <- aggregate(frobenius ~ model + cells + scenario, sub, function(v) sprintf("%.1f (%.1f)", mean(v), sd(v)))
+  wide <- reshape(tab, direction = "wide", idvar = c("scenario", "cells"), timevar = "model")
+  names(wide) <- sub("frobenius.", "", names(wide))
+  knitr::kable(wide, row.names = FALSE)
+}
+mean_sd(c("MAR_1", "MAR_2", "MNAR_1", "MNAR_2"), c("missing", "observed", "combined"))
 ```
 
 The table compares the median over folds with the value read off Figure 1 of
@@ -186,9 +202,17 @@ amp <- long[grepl("amp", long$scenario) & long$cells == "combined", ]
 ggplot(amp, aes(model, frobenius, fill = model)) +
   geom_boxplot(outlier.size = 0.5, linewidth = 0.3) +
   facet_wrap(~scenario) +
+  scale_y_log10(breaks = c(30, 35, 40, 50, 60)) +
   scale_fill_manual(values = colours, name = NULL) +
-  labs(x = NULL, y = "Out-of-sample Frobenius norm") +
-  theme_bw() + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+  labs(x = NULL, y = "Out-of-sample Frobenius norm (log scale)") +
+  theme_bw() + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+                     strip.background = element_blank(), panel.grid.minor = element_blank())
+```
+
+Means and standard deviations over the eight folds:
+
+```{r}
+mean_sd(c("MNAR_amp0", "MNAR_amp1", "MNAR_amp2"), "combined")
 ```
 
 ```{r}
@@ -204,6 +228,30 @@ Again the agreement is close: the joint multivariate models are clearly best,
 and covariate imputation helps `missBART2` when many covariates are missing
 (MNAR_amp2). `missBART1` does a little better than in the paper in MNAR_amp2,
 and `uni_missBART1` a little worse.
+
+### Missingness model or handling of missing covariates?
+
+Three of the models differ in only one respect at a time, which separates two
+questions. `missBART1` and `missBART2_impX` both use covariates imputed
+beforehand and differ only in the missingness model (probit regression or
+probit BART). `missBART2_impX` and `missBART2` share the missingness model and
+differ only in how missing covariates are handled (imputed beforehand, or
+handled inside the trees).
+
+```{r}
+dec <- aggregate(combined ~ model + scenario, d[d$scenario %in% c("MNAR_amp1", "MNAR_amp2") &
+                                                   d$model %in% c("missBART1", "missBART2_impX", "missBART2"), ], mean)
+wide <- reshape(dec, direction = "wide", idvar = "scenario", timevar = "model")
+names(wide) <- sub("combined.", "", names(wide))
+wide <- wide[, c("scenario", "missBART1", "missBART2_impX", "missBART2")]
+names(wide)[2:4] <- c("missBART1 (imputed X)", "missBART2 (imputed X)", "missBART2 (missing X in trees)")
+knitr::kable(wide, digits = 1, row.names = FALSE)
+```
+
+In these scenarios, where the missingness was generated from a probit
+regression, the choice of missingness model makes little difference, and
+imputing the covariates first does better than handling them inside the trees,
+clearly so when many covariates are missing (MNAR_amp2).
 
 ## Univariate examples (Appendix D)
 

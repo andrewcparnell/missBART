@@ -63,6 +63,9 @@ and <code><a href="missBART.html">missBART2()</a></code> to data without missing
 <span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  progress_every <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  save_y_pred <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep_trees <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_chains <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -138,6 +141,22 @@ else is returned on the original scale.</p></dd>
 <dt id="arg-save-y-pred">save_y_pred<a class="anchor" aria-label="anchor" href="#arg-save-y-pred"></a></dt>
 <dd><p>logical. Keep posterior predictive draws for the
 training data (<code>y_pred</code>)?</p></dd>
+
+
+<dt id="arg-keep-trees">keep_trees<a class="anchor" aria-label="anchor" href="#arg-keep-trees"></a></dt>
+<dd><p>logical. Keep the trees of every posterior sample? This
+is needed for <a href="missBART-methods.html">predict()</a> at new covariates,
+<code><a href="partial_dependence.html">partial_dependence()</a></code> and <code><a href="interactions.html">interactions()</a></code>, and can take a lot of memory.</p></dd>
+
+
+<dt id="arg-n-chains">n_chains<a class="anchor" aria-label="anchor" href="#arg-n-chains"></a></dt>
+<dd><p>number of chains to run from different starting values. The
+samples of all chains are returned together, with <code>chain</code> giving the
+chain of each sample; see <code><a href="chain_diagnostics.html">chain_diagnostics()</a></code>.</p></dd>
+
+
+<dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
+<dd><p>number of chains to run in parallel (not on Windows).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -70,7 +70,9 @@
 <code><a href="../reference/missBART.html">missBART2()</a></code> to the <em>global Amax</em> data of Maire et
 al. (2015), the application in Section 7 of Goh, Soh, Parnell and Murphy
 (2024, <a href="https://arxiv.org/abs/2412.14946" class="external-link">arXiv:2412.14946</a>),
-using version 0.2.0 of the package.</p>
+using version 0.2.0 of the package. It also compares them with the same
+response model fitted under the assumption that the missingness can be
+ignored.</p>
 <div class="section level2">
 <h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
 </h2>
@@ -79,7 +81,7 @@ together with 46 soil and climate covariates. The traits are specific
 leaf area (SLA), light-saturated photosynthetic rate (Aarea), leaf
 nitrogen (Narea), leaf phosphorus (Parea) and stomatal conductance (Gs),
 all modelled on the log scale. The covariates are complete, but most of
-the responses are not:</p>
+the responses are not, and only 217 plants have all five:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Response</th>
@@ -121,7 +123,9 @@ posterior summaries that were saved by <a href="https://github.com/yongchengoh/m
 <h2 id="fitting-the-models">Fitting the models<a class="anchor" aria-label="anchor" href="#fitting-the-models"></a>
 </h2>
 <p>The settings are those of the paper: 5,000 burn-in and 5,000 kept
-iterations, 100 regression trees and 50 missingness trees.</p>
+iterations, 100 regression trees and 50 missingness trees. Each model is
+run as four chains from different starting values, and the trees are
+kept so that partial dependence curves can be computed afterwards.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/yongchengoh/missBART" class="external-link">missBART</a></span><span class="op">)</span></span>
 <span></span>
@@ -129,11 +133,17 @@ iterations, 100 regression trees and 50 missingness trees.</p>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SLA"</span>, <span class="st">"Aarea"</span>, <span class="st">"Narea"</span>, <span class="st">"Parea"</span>, <span class="st">"Gs"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">==</span> <span class="st">"PPTmean"</span><span class="op">)</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/missBART.html">missBART1</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, n_trees <span class="op">=</span> <span class="fl">100</span>, burn <span class="op">=</span> <span class="fl">5000</span>, iters <span class="op">=</span> <span class="fl">5000</span>, thin <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/missBART.html">missBART2</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, n_reg_trees <span class="op">=</span> <span class="fl">100</span>, n_class_trees <span class="op">=</span> <span class="fl">50</span>, burn <span class="op">=</span> <span class="fl">5000</span>, iters <span class="op">=</span> <span class="fl">5000</span>, thin <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>Each fit took about 1.3 minutes (with twelve fits running at the same
-time).</p>
+<span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/missBART.html">missBART1</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, n_trees <span class="op">=</span> <span class="fl">100</span>, burn <span class="op">=</span> <span class="fl">5000</span>, iters <span class="op">=</span> <span class="fl">5000</span>, thin <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                  n_chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span>, keep_trees <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/missBART.html">missBART2</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, n_reg_trees <span class="op">=</span> <span class="fl">100</span>, n_class_trees <span class="op">=</span> <span class="fl">50</span>, burn <span class="op">=</span> <span class="fl">5000</span>, iters <span class="op">=</span> <span class="fl">5000</span>, thin <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                  n_chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span>, keep_trees <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># the same response model, with the missingness assumed ignorable (MAR)</span></span>
+<span><span class="va">fit_mar</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/missBART.html">missBART1</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, n_trees <span class="op">=</span> <span class="fl">100</span>, burn <span class="op">=</span> <span class="fl">5000</span>, iters <span class="op">=</span> <span class="fl">5000</span>, thin <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                     include_y <span class="op">=</span> <span class="cn">FALSE</span>, n_chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, keep_trees <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Four chains of <code>missBART1</code> took 1.7 minutes and four
+chains of <code>missBART2</code> 1.5 minutes, with the chains of each
+model run in parallel.</p>
 </div>
 <div class="section level2">
 <h2 id="fit-to-the-observed-responses">Fit to the observed responses<a class="anchor" aria-label="anchor" href="#fit-to-the-observed-responses"></a>
@@ -146,24 +156,28 @@ rug on the vertical axis shows the posterior means of the imputed values
 for the missing responses, which have no observed value to plot them
 against. The points fall in horizontal bands because plants measured at
 the same site share the same covariates, and so the same prediction.
-These plots correspond to Figure 5 of the paper, with the axes
-swapped.</p>
+These plots correspond to Figure 5 of the paper, with the axes swapped
+(first chain of each model).</p>
 <p><img src="figures/amax_missBART1.png" class="r-plt" alt="" width="100%"><img src="figures/amax_missBART2.png" class="r-plt" alt="" width="100%"></p>
 <table class="table">
-<caption>In-sample root mean squared error and coverage of the 95%
-prediction intervals for the observed responses (first seed).</caption>
+<caption>Root mean squared error for the observed responses, and
+coverage of the 95% prediction intervals.</caption>
 <colgroup>
+<col width="8%">
 <col width="9%">
-<col width="16%">
-<col width="16%">
-<col width="20%">
-<col width="20%">
-<col width="15%">
+<col width="9%">
+<col width="4%">
+<col width="14%">
+<col width="19%">
+<col width="19%">
+<col width="14%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Response</th>
-<th align="right">RMSE, missBART1</th>
-<th align="right">RMSE, missBART2</th>
+<th align="right">missBART1</th>
+<th align="right">missBART2</th>
+<th align="right">MAR</th>
+<th align="right">Complete cases</th>
 <th align="right">Coverage, missBART1</th>
 <th align="right">Coverage, missBART2</th>
 <th align="right">SD of observed</th>
@@ -172,7 +186,9 @@ prediction intervals for the observed responses (first seed).</caption>
 <tr class="odd">
 <td align="left">SLA</td>
 <td align="right">0.39</td>
-<td align="right">0.40</td>
+<td align="right">0.39</td>
+<td align="right">0.39</td>
+<td align="right">0.68</td>
 <td align="right">0.95</td>
 <td align="right">0.95</td>
 <td align="right">0.62</td>
@@ -181,59 +197,286 @@ prediction intervals for the observed responses (first seed).</caption>
 <td align="left">Aarea</td>
 <td align="right">0.44</td>
 <td align="right">0.44</td>
-<td align="right">0.96</td>
+<td align="right">0.44</td>
+<td align="right">0.63</td>
+<td align="right">0.95</td>
 <td align="right">0.96</td>
 <td align="right">0.65</td>
 </tr>
 <tr class="odd">
 <td align="left">Narea</td>
+<td align="right">0.31</td>
+<td align="right">0.31</td>
 <td align="right">0.32</td>
-<td align="right">0.32</td>
+<td align="right">0.45</td>
 <td align="right">0.96</td>
-<td align="right">0.96</td>
+<td align="right">0.95</td>
 <td align="right">0.50</td>
 </tr>
 <tr class="even">
 <td align="left">Parea</td>
 <td align="right">0.36</td>
 <td align="right">0.35</td>
-<td align="right">0.97</td>
-<td align="right">0.97</td>
+<td align="right">0.35</td>
+<td align="right">0.52</td>
+<td align="right">0.95</td>
+<td align="right">0.96</td>
 <td align="right">0.66</td>
 </tr>
 <tr class="odd">
 <td align="left">Gs</td>
-<td align="right">0.50</td>
+<td align="right">0.47</td>
+<td align="right">0.48</td>
 <td align="right">0.49</td>
+<td align="right">0.88</td>
 <td align="right">0.97</td>
 <td align="right">0.97</td>
 <td align="right">0.80</td>
 </tr>
 </tbody>
 </table>
-<p>Both models fit the observed responses equally well, and the
-prediction intervals have close to their nominal coverage. As the paper
-notes, the two models differ in what they impute: <code>missBART2</code>
-imputes values within the range of the observed data, while
-<code>missBART1</code> imputes values that are far from the observed
-ones.</p>
+<p>The three models that use every row fit the observed responses
+equally well, and the prediction intervals have close to their nominal
+coverage. The complete case model is fitted to 217 plants only, so most
+of its error is out of sample. The observed responses alone therefore
+cannot tell the three models apart; they differ in what they say about
+the <em>missing</em> responses.</p>
 </div>
 <div class="section level2">
-<h2 id="how-stable-are-the-imputations">How stable are the imputations?<a class="anchor" aria-label="anchor" href="#how-stable-are-the-imputations"></a>
+<h2 id="what-is-imputed">What is imputed<a class="anchor" aria-label="anchor" href="#what-is-imputed"></a>
 </h2>
-<p>Each model was run from four different seeds. The plot shows the
-average imputed value of each response for each seed, next to the
-average of the observed values (dashed line).</p>
-<p><img src="global-amax_files/figure-html/stability-1.png" class="r-plt" alt="" width="768"></p>
-<p>The <code>missBART2</code> imputations stay fairly close to the
-observed values, although they are not identical across seeds. The
-<code>missBART1</code> imputations are very different across seeds: for
-every response except Aarea (which has only 12 missing values), some
-seeds impute values well <em>above</em> the observed ones and other
-seeds values well <em>below</em>. Within a chain the imputations are
-stable (the two halves of each chain agree), so each chain has settled
-in a different mode and does not move between them in 10,000
-iterations.</p>
+<p>The grey area in each panel is the distribution of the observed
+values of a response. The lines are the distributions of the imputed
+values (posterior means), one line per chain.</p>
+<p><img src="figures/amax_imputed.png" class="r-plt" alt="" width="100%"></p>
+<table class="table">
+<caption>Mean of the observed values, and mean of the imputed values in
+each chain.</caption>
+<thead><tr class="header">
+<th align="left">Model</th>
+<th align="right">Chain</th>
+<th align="right">SLA</th>
+<th align="right">Aarea</th>
+<th align="right">Narea</th>
+<th align="right">Parea</th>
+<th align="right">Gs</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Observed values</td>
+<td align="right"></td>
+<td align="right">4.64</td>
+<td align="right">2.17</td>
+<td align="right">0.53</td>
+<td align="right">-2.31</td>
+<td align="right">5.38</td>
+</tr>
+<tr class="even">
+<td align="left">Complete cases</td>
+<td align="right"></td>
+<td align="right">4.29</td>
+<td align="right">1.93</td>
+<td align="right">0.67</td>
+<td align="right">-2.02</td>
+<td align="right">4.95</td>
+</tr>
+<tr class="odd">
+<td align="left">MAR</td>
+<td align="right">1</td>
+<td align="right">4.59</td>
+<td align="right">1.78</td>
+<td align="right">0.63</td>
+<td align="right">-2.10</td>
+<td align="right">5.43</td>
+</tr>
+<tr class="even">
+<td align="left">MAR</td>
+<td align="right">2</td>
+<td align="right">4.51</td>
+<td align="right">1.86</td>
+<td align="right">0.68</td>
+<td align="right">-2.14</td>
+<td align="right">5.40</td>
+</tr>
+<tr class="odd">
+<td align="left">missBART2</td>
+<td align="right">1</td>
+<td align="right">4.47</td>
+<td align="right">1.58</td>
+<td align="right">0.58</td>
+<td align="right">-2.61</td>
+<td align="right">5.47</td>
+</tr>
+<tr class="even">
+<td align="left">missBART2</td>
+<td align="right">2</td>
+<td align="right">4.61</td>
+<td align="right">1.75</td>
+<td align="right">0.57</td>
+<td align="right">-2.10</td>
+<td align="right">5.40</td>
+</tr>
+<tr class="odd">
+<td align="left">missBART2</td>
+<td align="right">3</td>
+<td align="right">5.23</td>
+<td align="right">1.55</td>
+<td align="right">0.46</td>
+<td align="right">-2.30</td>
+<td align="right">5.38</td>
+</tr>
+<tr class="even">
+<td align="left">missBART2</td>
+<td align="right">4</td>
+<td align="right">4.76</td>
+<td align="right">1.62</td>
+<td align="right">0.47</td>
+<td align="right">-2.65</td>
+<td align="right">5.61</td>
+</tr>
+<tr class="odd">
+<td align="left">missBART1</td>
+<td align="right">1</td>
+<td align="right">5.09</td>
+<td align="right">1.65</td>
+<td align="right">1.48</td>
+<td align="right">-3.29</td>
+<td align="right">6.92</td>
+</tr>
+<tr class="even">
+<td align="left">missBART1</td>
+<td align="right">2</td>
+<td align="right">4.15</td>
+<td align="right">1.87</td>
+<td align="right">-0.11</td>
+<td align="right">-3.24</td>
+<td align="right">3.94</td>
+</tr>
+<tr class="odd">
+<td align="left">missBART1</td>
+<td align="right">3</td>
+<td align="right">5.31</td>
+<td align="right">1.64</td>
+<td align="right">1.42</td>
+<td align="right">-3.18</td>
+<td align="right">6.85</td>
+</tr>
+<tr class="even">
+<td align="left">missBART1</td>
+<td align="right">4</td>
+<td align="right">3.70</td>
+<td align="right">1.91</td>
+<td align="right">0.64</td>
+<td align="right">-3.50</td>
+<td align="right">6.88</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Under MAR the imputations are predictions from the covariates and
+the observed responses of the same plant, so they sit inside the
+observed distribution, and the two chains agree closely.</li>
+<li>
+<code>missBART2</code> stays fairly close to MAR, but its chains
+differ from each other more than the MAR chains do.</li>
+<li>
+<code>missBART1</code> imputes values far from the observed ones,
+and its chains disagree about the direction: for most responses some
+chains impute values well <em>above</em> the observed ones and others
+well <em>below</em>.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="how-stable-are-the-fits">How stable are the fits?<a class="anchor" aria-label="anchor" href="#how-stable-are-the-fits"></a>
+</h2>
+<p><code><a href="../reference/chain_diagnostics.html">chain_diagnostics()</a></code> compares the chains. The potential
+scale reduction factor (R-hat) should be close to 1. The second table
+gives the same information in more tangible units: the difference
+between the largest and smallest chain mean, in standard deviations of
+the observed response.</p>
+<table class="table">
+<caption>R-hat of the mean imputed value of each response.</caption>
+<thead><tr class="header">
+<th align="left">Model</th>
+<th align="right">SLA</th>
+<th align="right">Aarea</th>
+<th align="right">Narea</th>
+<th align="right">Parea</th>
+<th align="right">Gs</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">MAR</td>
+<td align="right">1.17</td>
+<td align="right">1.07</td>
+<td align="right">1.13</td>
+<td align="right">1.06</td>
+<td align="right">1.06</td>
+</tr>
+<tr class="even">
+<td align="left">missBART2</td>
+<td align="right">3.86</td>
+<td align="right">1.20</td>
+<td align="right">1.29</td>
+<td align="right">5.30</td>
+<td align="right">1.95</td>
+</tr>
+<tr class="odd">
+<td align="left">missBART1</td>
+<td align="right">5.47</td>
+<td align="right">1.30</td>
+<td align="right">10.33</td>
+<td align="right">2.44</td>
+<td align="right">24.03</td>
+</tr>
+</tbody>
+</table>
+<table class="table">
+<caption>Range of the mean imputed value across chains, in standard
+deviations of the observed response.</caption>
+<thead><tr class="header">
+<th align="left">Model</th>
+<th align="right">SLA</th>
+<th align="right">Aarea</th>
+<th align="right">Narea</th>
+<th align="right">Parea</th>
+<th align="right">Gs</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">MAR</td>
+<td align="right">0.13</td>
+<td align="right">0.11</td>
+<td align="right">0.11</td>
+<td align="right">0.07</td>
+<td align="right">0.04</td>
+</tr>
+<tr class="even">
+<td align="left">missBART2</td>
+<td align="right">1.25</td>
+<td align="right">0.30</td>
+<td align="right">0.23</td>
+<td align="right">0.84</td>
+<td align="right">0.29</td>
+</tr>
+<tr class="odd">
+<td align="left">missBART1</td>
+<td align="right">2.63</td>
+<td align="right">0.40</td>
+<td align="right">3.20</td>
+<td align="right">0.49</td>
+<td align="right">3.72</td>
+</tr>
+</tbody>
+</table>
+<p>The chains of <code>missBART1</code> differ by several standard
+deviations for some responses. Within a chain the imputations are
+stable, so each chain has settled in a different mode and does not move
+between them in 10,000 iterations. The <code>missBART2</code> chains are
+much closer to each other, but they have not converged to a common
+answer either (the R-hat of a mean over hundreds of imputed values is a
+strict measure, because that mean varies very little within a
+chain).</p>
 <p>The same shows in the probit coefficients. The table gives the
 posterior mean of the coefficient of each response in the model for its
 own missingness. A positive value means that large values are more
@@ -243,11 +486,11 @@ four chains with the update of the missing responses described in the
 paper (<code>ymis_update = "marginal"</code>), and four shorter chains
 with the original R code of version 0.1.0, which takes about 29 minutes
 for 1,000 iterations on these data.</p>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="49%">
-<col width="12%">
-<col width="5%">
+<col width="48%">
+<col width="11%">
+<col width="6%">
 <col width="6%">
 <col width="6%">
 <col width="6%">
@@ -257,7 +500,7 @@ for 1,000 iterations on these data.</p>
 <thead><tr class="header">
 <th align="left">Version</th>
 <th align="right">Iterations</th>
-<th align="right">Seed</th>
+<th align="right">Chain</th>
 <th align="right">SLA</th>
 <th align="right">Aarea</th>
 <th align="right">Narea</th>
@@ -269,81 +512,81 @@ for 1,000 iterations on these data.</p>
 <td align="left">0.2.0, conditional update</td>
 <td align="right">10,000</td>
 <td align="right">1</td>
-<td align="right">-20.9</td>
-<td align="right">6.3</td>
-<td align="right">-24.5</td>
-<td align="right">14.3</td>
-<td align="right">-21.9</td>
+<td align="right">24.7</td>
+<td align="right">-6.1</td>
+<td align="right">26.8</td>
+<td align="right">-19.5</td>
+<td align="right">24.2</td>
 </tr>
 <tr class="even">
 <td align="left">0.2.0, conditional update</td>
 <td align="right">10,000</td>
 <td align="right">2</td>
-<td align="right">-20.6</td>
-<td align="right">3.4</td>
-<td align="right">-26.4</td>
-<td align="right">17.5</td>
-<td align="right">-22.3</td>
+<td align="right">-12.4</td>
+<td align="right">7.2</td>
+<td align="right">-20.8</td>
+<td align="right">-14.8</td>
+<td align="right">-24.7</td>
 </tr>
 <tr class="odd">
 <td align="left">0.2.0, conditional update</td>
 <td align="right">10,000</td>
 <td align="right">3</td>
-<td align="right">24.2</td>
-<td align="right">-9.2</td>
-<td align="right">27.3</td>
-<td align="right">-19.5</td>
-<td align="right">23.1</td>
+<td align="right">26.1</td>
+<td align="right">-7.5</td>
+<td align="right">29.4</td>
+<td align="right">-18.3</td>
+<td align="right">24.0</td>
 </tr>
 <tr class="even">
 <td align="left">0.2.0, conditional update</td>
 <td align="right">10,000</td>
 <td align="right">4</td>
-<td align="right">26.6</td>
-<td align="right">0.9</td>
-<td align="right">34.2</td>
-<td align="right">-19.2</td>
-<td align="right">-21.0</td>
+<td align="right">-26.8</td>
+<td align="right">-1.3</td>
+<td align="right">4.8</td>
+<td align="right">-21.7</td>
+<td align="right">22.8</td>
 </tr>
 <tr class="odd">
 <td align="left">0.2.0, marginal update</td>
 <td align="right">10,000</td>
 <td align="right">1</td>
-<td align="right">19.3</td>
-<td align="right">1.6</td>
-<td align="right">-0.2</td>
-<td align="right">-18.1</td>
-<td align="right">16.7</td>
-</tr>
-<tr class="even">
-<td align="left">0.2.0, marginal update</td>
-<td align="right">10,000</td>
-<td align="right">2</td>
-<td align="right">9.4</td>
-<td align="right">-1.1</td>
-<td align="right">4.2</td>
-<td align="right">12.9</td>
-<td align="right">-13.1</td>
-</tr>
-<tr class="odd">
-<td align="left">0.2.0, marginal update</td>
-<td align="right">10,000</td>
-<td align="right">3</td>
-<td align="right">18.1</td>
-<td align="right">0.3</td>
-<td align="right">-0.5</td>
-<td align="right">-18.4</td>
+<td align="right">14.7</td>
+<td align="right">2.5</td>
+<td align="right">1.3</td>
+<td align="right">-18.0</td>
 <td align="right">-12.9</td>
 </tr>
 <tr class="even">
 <td align="left">0.2.0, marginal update</td>
 <td align="right">10,000</td>
+<td align="right">2</td>
+<td align="right">17.6</td>
+<td align="right">3.1</td>
+<td align="right">3.6</td>
+<td align="right">-17.3</td>
+<td align="right">17.1</td>
+</tr>
+<tr class="odd">
+<td align="left">0.2.0, marginal update</td>
+<td align="right">10,000</td>
+<td align="right">3</td>
+<td align="right">15.2</td>
+<td align="right">0.9</td>
+<td align="right">8.1</td>
+<td align="right">-17.4</td>
+<td align="right">-13.5</td>
+</tr>
+<tr class="even">
+<td align="left">0.2.0, marginal update</td>
+<td align="right">10,000</td>
 <td align="right">4</td>
-<td align="right">13.6</td>
-<td align="right">2.7</td>
-<td align="right">6.3</td>
-<td align="right">-17.6</td>
-<td align="right">-12.6</td>
+<td align="right">17.2</td>
+<td align="right">0.1</td>
+<td align="right">-0.1</td>
+<td align="right">-17.4</td>
+<td align="right">-13.0</td>
 </tr>
 <tr class="odd">
 <td align="left">0.1.0 (original R code)</td>
@@ -412,17 +655,17 @@ sign as in the paper:</p>
 <tr class="odd">
 <td align="left">0.2.0, conditional update</td>
 <td align="right">2</td>
-<td align="right">3</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">1</td>
 </tr>
 <tr class="even">
 <td align="left">0.2.0, marginal update</td>
 <td align="right">4</td>
-<td align="right">3</td>
-<td align="right">2</td>
-<td align="right">3</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">4</td>
 <td align="right">3</td>
 </tr>
 <tr class="odd">
@@ -435,19 +678,17 @@ sign as in the paper:</p>
 </tr>
 </tbody>
 </table>
-<p>With the original code, and with the marginal update, most chains
-agree with the paper about SLA, Parea and Gs: large values of SLA are
-more likely to be missing, and large values of Parea and Gs are more
-likely to be observed. Narea is not settled even there. With the
-conditional update, which is the correct full conditional distribution,
-three of the four chains fall into two explanations that are mirror
-images of each other (every sign reversed), and no direction is settled
-for any response.</p>
+<p>The chains of every version disagree with each other for at least one
+response. Where the original code and the marginal update agree with the
+paper more often than the conditional update does, that is not evidence
+for the direction reported in the paper, because the conditional update
+is the correct full conditional distribution.</p>
 <p>So the multimodality is a property of the model on these data, and it
 is present in the original code too. Which mode a chain finds depends on
-the seed, and how often each mode is found depends on how the missing
-responses are updated. Because the chains do not move between modes,
-their relative posterior weights cannot be judged from these runs.</p>
+its starting values, and how often each mode is found depends on how the
+missing responses are updated. Because the chains do not move between
+modes, their relative posterior weights cannot be judged from these
+runs.</p>
 <p>This is the well-known weak identifiability of selection models. With
 a probit <em>regression</em> for the missingness, a response that is
 mostly missing can be explained almost equally well by missing values
@@ -458,28 +699,98 @@ the two explanations. The practical consequences are:</p>
 mechanism from <code>missBART1</code> on these data (for example, Figure
 6 of the paper) depend on the chain, and should not be drawn from a
 single run.</li>
-<li>Several chains from different starting values should be run and
-compared before interpreting <code>missBART1</code> coefficients or
-imputations.</li>
+<li>Several chains should be run and compared (<code>n_chains</code>)
+before interpreting the coefficients or imputations of either
+model.</li>
 <li>
-<code>missBART2</code> is the safer choice here.</li>
+<code>missBART2</code> is the safer choice here, because its chains
+differ far less, but its imputations should still be reported with their
+between-chain variation.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="variable-importance-from-missbart2">Variable importance from missBART2<a class="anchor" aria-label="anchor" href="#variable-importance-from-missbart2"></a>
+<h2 id="does-modelling-the-missingness-change-the-conclusions">Does modelling the missingness change the conclusions?<a class="anchor" aria-label="anchor" href="#does-modelling-the-missingness-change-the-conclusions"></a>
+</h2>
+<p>The partial dependence of each response on soil pH, one of the
+covariates highlighted in the paper (its Figure 9), under MAR and under
+the two joint models. The lines are posterior means and the bands 95%
+intervals, pooled over chains.</p>
+<p><img src="global-amax_files/figure-html/pdp-ph-1.png" class="r-plt" alt="" width="864"></p>
+<p>The curves average over all plants, including those whose response is
+missing, and the models disagree about those. Measured in standard
+deviations of the observed response, the average shift of each curve
+relative to MAR is:</p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">Model</th>
+<th align="right">SLA</th>
+<th align="right">Aarea</th>
+<th align="right">Narea</th>
+<th align="right">Parea</th>
+<th align="right">Gs</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">missBART1</td>
+<td align="right">0.09</td>
+<td align="right">0.02</td>
+<td align="right">0.07</td>
+<td align="right">-1.43</td>
+<td align="right">0.48</td>
+</tr>
+<tr class="even">
+<td align="left">missBART2</td>
+<td align="right">0.20</td>
+<td align="right">0.10</td>
+<td align="right">-0.09</td>
+<td align="right">-0.39</td>
+<td align="right">0.12</td>
+</tr>
+</tbody>
+</table>
+<p>The covariates used by the regression trees are broadly similar
+across the models. The rank correlation of the variable importances with
+those under MAR is 0.34 for <code>missBART1</code> and 0.58 for
+<code>missBART2</code>, and 3 and 5 of the ten most important covariates
+are shared.</p>
+</div>
+<div class="section level2">
+<h2 id="missingness-probabilities">Missingness probabilities<a class="anchor" aria-label="anchor" href="#missingness-probabilities"></a>
+</h2>
+<p>The partial dependence of the probability that each response is
+missing on the value of Parea, as in Figure 10 of the paper (which
+showed the probability of being observed). One line per chain.</p>
+<p><img src="global-amax_files/figure-html/pdp-missing-1.png" class="r-plt" alt="" width="864"></p>
+<p>For <code>missBART1</code>, the curve for the missingness of Parea
+itself is steep and the same in every chain: plants with low Parea are
+much more likely to have it missing. The curves for the other responses
+differ between chains, in line with the coefficients above. The
+<code>missBART2</code> curves are flatter and show the same direction
+for Parea in the chains where there is any effect.</p>
+</div>
+<div class="section level2">
+<h2 id="variable-importance-and-interactions-from-missbart2">Variable importance and interactions from missBART2<a class="anchor" aria-label="anchor" href="#variable-importance-and-interactions-from-missbart2"></a>
 </h2>
 <p>The ten predictors used most often in the missingness trees and in
-the regression trees (first seed), as in Figure 7 of the paper.</p>
+the regression trees (averaged over chains), as in Figure 7 of the
+paper.</p>
 <p><img src="global-amax_files/figure-html/varimp-1.png" class="r-plt" alt="" width="768"></p>
-<p>The importances are spread thinly over many correlated covariates, so
-the ordering varies from seed to seed. Across the four seeds, the three
-most used predictors in the missingness trees are: ALU, SAND, Narea;
-SILT, ALU, PPTmin; SAND, Parea, ALU; ALU, Narea, TMP0gs. Exchangeable
-aluminium (ALU), which the paper also found to be the most important
-predictor of the missingness, ranks 1, 2, 3, 1 out of 51. Parea, the
-only response among the top ten in the paper, ranks 47, 27, 2, 20, so
-the importance of individual responses in the missingness trees is not
-stable either.</p>
+<p>The importance is the proportion of splitting rules that use a
+predictor, averaged over the posterior samples. It is spread thinly over
+many correlated covariates, so the ordering varies from chain to chain.
+Across the four chains, the three most used predictors in the
+missingness trees are: ALU, Parea, CLAY; ALU, TMPmean, SBA; ALU, SAND,
+BULK; ALU, PPTseason, Miq. Exchangeable aluminium (ALU), which the paper
+found to be the most important predictor of the missingness, ranks 1, 1,
+1, 1 out of 51. Parea, the only response among the top ten in the paper,
+ranks 2, 42, 18, 9. A response can also be used in the missingness trees
+simply because it is correlated with the covariates, so its importance
+is not by itself evidence that the data are missing not at random.</p>
+<p><code><a href="../reference/interactions.html">interactions()</a></code> counts how often two predictors are used
+in consecutive splitting rules on the same branch, as in Figure 8 of the
+paper. For the ten most important predictors of the regression trees
+(first chain):</p>
+<p><img src="global-amax_files/figure-html/interactions-1.png" class="r-plt" alt="" width="528"></p>
 </div>
 <div class="section level2">
 <h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>

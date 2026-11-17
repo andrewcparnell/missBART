@@ -291,6 +291,31 @@ public:
     fit.col(i) = f;
   }
 
+  // All trees as one matrix with a row per node: tree number, row of the left
+  // child (0 for a terminal node; the right child is the next row), splitting
+  // variable, split value, direction of missing values, and the p terminal
+  // node parameters. Indices are 1-based.
+  NumericMatrix export_trees() const {
+    int total = 0;
+    for (int t = 0; t < K; ++t) total += trees[t].nodes.size();
+    NumericMatrix out(total, 5 + p);
+    int row = 0;
+    for (int t = 0; t < K; ++t) {
+      const Tree& tr = trees[t];
+      const int base = row;
+      for (std::size_t k = 0; k < tr.nodes.size(); ++k, ++row) {
+        const Node& nd = tr.nodes[k];
+        out(row, 0) = t + 1;
+        out(row, 1) = nd.left >= 0 ? base + nd.left + 1 : 0;
+        out(row, 2) = nd.left >= 0 ? nd.var + 1 : 0;
+        out(row, 3) = nd.left >= 0 ? nd.val : 0.0;
+        out(row, 4) = (nd.left >= 0 && nd.na_left) ? 1.0 : 0.0;
+        if (nd.left < 0) for (int j = 0; j < p; ++j) out(row, 5 + j) = tr.mu(j, k);
+      }
+    }
+    return out;
+  }
+
   // Number of splitting rules using each variable.
   void var_counts(double* out) const {
     for (int v = 0; v < q; ++v) out[v] = 0.0;
@@ -568,6 +593,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
                ay = ctrl["ay"], by = ctrl["by"];
   const bool save_y_pred = ctrl["save_y_pred"], save_z = ctrl["save_z"];
   const bool make_pdp = ctrl["make_pdp"];
+  const bool keep_trees = ctrl["keep_trees"];
   const arma::vec pdp_grid = as<arma::vec>(ctrl["pdp_grid"]);
   const bool show_progress = ctrl["show_progress"];
   const int progress_every = std::max(1, as<int>(ctrl["progress_every"]));
@@ -663,6 +689,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
   NumericMatrix var_imp_miss(model == 2 ? iters : 0, model == 2 ? r2 : 0);
   const bool pdp_on = make_pdp && model == 2 && p == 1 && include_y;
   List pdp_out(pdp_on ? iters : 0);
+  List reg_trees(keep_trees ? iters : 0), class_trees((keep_trees && model == 2) ? iters : 0);
   NumericVector mh_accept(n_mis);
   std::vector<double> row_acc(n, 0.0);
 
@@ -830,6 +857,10 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
         y_impute(s, k) = (Yt(mis_j[k], mis_i[k]) + 0.5) * y_rng[mis_j[k]] + y_min[mis_j[k]];
       reg.var_counts(vbuf.memptr());
       for (int v = 0; v < q; ++v) var_imp(s, v) = vbuf[v];
+      if (keep_trees) {
+        reg_trees[s] = reg.export_trees();
+        if (model == 2) class_trees[s] = cls->export_trees();
+      }
 
       if (do_predict) {
         reg.predict(x_new, new_fit);
@@ -884,6 +915,7 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
     _["var_imp"] = var_imp, _["B_post"] = B_post, _["R_post"] = R_post,
     _["tau_b"] = tau_post, _["z_post"] = z_post, _["var_imp_miss"] = var_imp_miss,
     _["pdp_out"] = pdp_out, _["y_miss_accept"] = mh_accept,
+    _["reg_trees"] = reg_trees, _["class_trees"] = class_trees,
     _["tree_accept"] = NumericVector::create(_["regression"] = reg_acc, _["missingness"] = cls_acc));
 }
 
@@ -949,4 +981,86 @@ arma::mat draw_ymis_cpp(const arma::mat& y, const IntegerMatrix& m, const arma::
   arma::mat Yt = y.t();
   draw_ymis(Yt, Q, b.t(), patterns, conditional);
   return Yt.t();
+}
+
+// ----------------------------------------------------------------------------
+// Predictions from stored trees
+// ----------------------------------------------------------------------------
+
+// Adds the sum-of-trees prediction for one observation to out[0..p-1]. `tr` is
+// a matrix written by Forest::export_trees(), `roots` the rows of the roots.
+static inline void stored_predict(const NumericMatrix& tr, const std::vector<int>& roots,
+                                  const double* x, std::size_t stride, int p, double* out) {
+  const double* left = &tr(0, 1);
+  const double* var = &tr(0, 2);
+  const double* val = &tr(0, 3);
+  const double* nal = &tr(0, 4);
+  for (std::size_t t = 0; t < roots.size(); ++t) {
+    int k = roots[t];
+    while (left[k] > 0) {
+      const double v = x[stride * (static_cast<int>(var[k]) - 1)];
+      const bool go_left = std::isnan(v) ? (nal[k] > 0) : (v <= val[k]);
+      k = static_cast<int>(left[k]) - 1 + (go_left ? 0 : 1);
+    }
+    for (int j = 0; j < p; ++j) out[j] += tr(k, 5 + j);
+  }
+}
+
+static std::vector<int> root_rows(const NumericMatrix& tr) {
+  std::vector<int> roots;
+  double last = 0.0;
+  for (int k = 0; k < tr.nrow(); ++k) if (tr(k, 0) != last) { roots.push_back(k); last = tr(k, 0); }
+  return roots;
+}
+
+// Sum-of-trees predictions (n x p x draws) on the scale used by the sampler.
+// [[Rcpp::export(name = ".forest_predict_cpp")]]
+arma::cube forest_predict_cpp(const List& trees, const arma::mat& X, int p) {
+  const int n = X.n_rows, D = trees.size();
+  arma::cube out(n, p, D, arma::fill::zeros);
+  std::vector<double> buf(p);
+  for (int d = 0; d < D; ++d) {
+    const NumericMatrix tr = trees[d];
+    const std::vector<int> roots = root_rows(tr);
+    for (int i = 0; i < n; ++i) {
+      std::fill(buf.begin(), buf.end(), 0.0);
+      stored_predict(tr, roots, X.memptr() + i, n, p, buf.data());
+      for (int j = 0; j < p; ++j) out(i, j, d) = buf[j];
+    }
+    if (d % 16 == 0) checkUserInterrupt();
+  }
+  return out;
+}
+
+// Partial dependence: predictions with column `col` (1-based) of X set to each
+// value of `grid` in turn. If the same draw-specific values should be used for
+// some columns (imputed responses), they are taken from X as given. With
+// probit = true the predictions are pnorm(offset + sum of trees). Returns the
+// individual curves averaged over draws (n x G x p) and the curve averaged
+// over observations for every draw (D x G x p).
+// [[Rcpp::export(name = ".forest_pdp_cpp")]]
+List forest_pdp_cpp(const List& trees, const arma::mat& X, int col, const arma::vec& grid, int p,
+                    const arma::vec& offset, bool probit) {
+  const int n = X.n_rows, q = X.n_cols, D = trees.size(), G = grid.n_elem;
+  arma::cube ice(n, G, p, arma::fill::zeros), pdp(D, G, p, arma::fill::zeros);
+  std::vector<double> row(q), buf(p);
+  for (int d = 0; d < D; ++d) {
+    const NumericMatrix tr = trees[d];
+    const std::vector<int> roots = root_rows(tr);
+    for (int i = 0; i < n; ++i) {
+      for (int v = 0; v < q; ++v) row[v] = X(i, v);
+      for (int g = 0; g < G; ++g) {
+        row[col - 1] = grid[g];
+        std::fill(buf.begin(), buf.end(), 0.0);
+        stored_predict(tr, roots, row.data(), 1, p, buf.data());
+        for (int j = 0; j < p; ++j) {
+          const double v = probit ? R::pnorm(offset[j] + buf[j], 0.0, 1.0, 1, 0) : buf[j];
+          ice(i, g, j) += v / D;
+          pdp(d, g, j) += v / n;
+        }
+      }
+    }
+    if (d % 4 == 0) checkUserInterrupt();
+  }
+  return List::create(_["ice"] = ice, _["pdp"] = pdp);
 }

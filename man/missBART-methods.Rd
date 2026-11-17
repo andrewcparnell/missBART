@@ -6,6 +6,7 @@
 \alias{summary.missBART}
 \alias{fitted.missBART}
 \alias{predict.missBART}
+\alias{plot.missBART}
 \alias{coef.missBART}
 \title{Methods for missBART fits}
 \usage{
@@ -15,7 +16,9 @@
 
 \method{fitted}{missBART}(object, ...)
 
-\method{predict}{missBART}(object, type = c("mean", "draws"), ...)
+\method{predict}{missBART}(object, newdata, type = c("mean", "draws"), ...)
+
+\method{plot}{missBART}(x, which = c("imputed", "fit"), ...)
 
 \method{coef}{missBART}(object, probs = c(0.025, 0.975), ...)
 }
@@ -25,15 +28,25 @@
 
 \item{...}{not used.}
 
-\item{type}{\code{"mean"} for the posterior mean of the BART mean function at
-\code{x_predict}, or \code{"draws"} for the list of posterior predictive draws.}
+\item{newdata}{covariates at which to predict. If missing, the predictions
+at the \code{x_predict} supplied when fitting are returned. Predictions at
+\code{newdata} need a fit with \code{keep_trees = TRUE}.}
+
+\item{type}{\code{"mean"} for the posterior mean of the BART mean function, or
+\code{"draws"} for posterior draws: the list of posterior predictive draws at
+\code{x_predict}, or an array (rows, responses, samples) of draws of the mean
+function at \code{newdata}.}
+
+\item{which}{for \code{plot()}: \code{"imputed"} compares the distribution of the
+imputed values (posterior means) with that of the observed values of each
+response, and \code{"fit"} plots the fitted against the observed values with
+the squared correlation in the panel title.}
 
 \item{probs}{two probabilities giving the posterior interval to report.}
 }
 \value{
 \code{fitted()} returns the posterior mean of the BART mean function for
-the training rows and \code{predict()} the same at the \code{x_predict} supplied
-when fitting. \code{coef()} returns the posterior mean of the probit
+the training rows and \code{predict()} the same for new covariates. \code{coef()} returns the posterior mean of the probit
 coefficients of a \code{missBART1()} fit together with their posterior
 intervals (an array with one slice per summary). A positive coefficient
 means that larger values of the predictor make the response more likely

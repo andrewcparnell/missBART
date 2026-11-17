@@ -64,6 +64,24 @@ These change the results relative to version 0.1.0.
   values.
 * `mvBART()` now respects `hypers$kappa`.
 
+## New features
+
+* `keep_trees = TRUE` stores the trees of every posterior sample
+  (`reg_trees`, `class_trees`). With them, `predict()` works at new
+  covariates (`newdata`), `partial_dependence()` gives partial dependence and
+  individual conditional expectation curves for the responses and for the
+  missingness probabilities, and `interactions()` counts how often pairs of
+  predictors are used in consecutive splitting rules.
+* `n_chains` runs several chains from different starting values (in parallel
+  with `cores`), and `chain_diagnostics()` compares them. `print()` warns
+  when the chains disagree. Selection models can be multimodal, so this is
+  recommended before interpreting a `missBART1()` fit.
+* `plot()` compares the distributions of imputed and observed values
+  (`which = "imputed"`) or plots fitted against observed values with the
+  squared correlation (`which = "fit"`).
+* The assumption of ignorable missingness is available as a benchmark with
+  the same response model: `include_y = FALSE`.
+
 ## Interface
 
 * New name `missBART1()`, matching the paper; `missBARTprobit()` still works.
@@ -94,8 +112,9 @@ These change the results relative to version 0.1.0.
     * `pdp_out` (`missBART2()`, univariate response) has one element per kept
       iteration, and no longer accumulates across iterations. `missBART1()`
       no longer returns `pdp_out`; compute the curves from `B_post`.
-    * The trees and terminal node parameters (`reg_trees`, `class_trees`,
-      `reg_mu`, `class_mu`, `accepted_trees`) are no longer returned.
+    * The trees are returned only with `keep_trees = TRUE`, in a compact
+      matrix format, and `reg_mu`, `class_mu` and `accepted_trees` are no
+      longer returned.
 * The arguments `true_trees_data`, `true_trees_missing`, `true_change_points`
   and `true_change_points_miss` are ignored.
 * Dependencies on `CholWishart`, `extraDistr`, `TruncatedNormal`, `Matrix`,

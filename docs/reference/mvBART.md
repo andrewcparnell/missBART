@@ -24,6 +24,9 @@ mvBART(
   show_progress = TRUE,
   progress_every = 10,
   save_y_pred = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 ```
@@ -102,6 +105,27 @@ mvBART(
 
   logical. Keep posterior predictive draws for the training data
   (`y_pred`)?
+
+- keep_trees:
+
+  logical. Keep the trees of every posterior sample? This is needed for
+  [predict()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
+  at new covariates,
+  [`partial_dependence()`](https://andrewcparnell.github.io/missBART/reference/partial_dependence.md)
+  and
+  [`interactions()`](https://andrewcparnell.github.io/missBART/reference/interactions.md),
+  and can take a lot of memory.
+
+- n_chains:
+
+  number of chains to run from different starting values. The samples of
+  all chains are returned together, with `chain` giving the chain of
+  each sample; see
+  [`chain_diagnostics()`](https://andrewcparnell.github.io/missBART/reference/chain_diagnostics.md).
+
+- cores:
+
+  number of chains to run in parallel (not on Windows).
 
 - ...:
 

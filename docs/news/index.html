@@ -71,6 +71,16 @@
 <code><a href="../reference/mvBART.html">mvBART()</a></code> now respects <code>hypers$kappa</code>.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li>
+<code>keep_trees = TRUE</code> stores the trees of every posterior sample (<code>reg_trees</code>, <code>class_trees</code>). With them, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> works at new covariates (<code>newdata</code>), <code><a href="../reference/partial_dependence.html">partial_dependence()</a></code> gives partial dependence and individual conditional expectation curves for the responses and for the missingness probabilities, and <code><a href="../reference/interactions.html">interactions()</a></code> counts how often pairs of predictors are used in consecutive splitting rules.</li>
+<li>
+<code>n_chains</code> runs several chains from different starting values (in parallel with <code>cores</code>), and <code><a href="../reference/chain_diagnostics.html">chain_diagnostics()</a></code> compares them. <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> warns when the chains disagree. Selection models can be multimodal, so this is recommended before interpreting a <code><a href="../reference/missBART.html">missBART1()</a></code> fit.</li>
+<li>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> compares the distributions of imputed and observed values (<code>which = "imputed"</code>) or plots fitted against observed values with the squared correlation (<code>which = "fit"</code>).</li>
+<li>The assumption of ignorable missingness is available as a benchmark with the same response model: <code>include_y = FALSE</code>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="interface-0-2-0">Interface<a class="anchor" aria-label="anchor" href="#interface-0-2-0"></a></h3>
 <ul><li>New name <code><a href="../reference/missBART.html">missBART1()</a></code>, matching the paper; <code><a href="../reference/missBART.html">missBARTprobit()</a></code> still works.</li>
 <li>Fits have class <code>"missBART"</code> with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> methods, and the helpers <code><a href="../reference/imputed_values.html">imputed_values()</a></code>, <code><a href="../reference/imputed_values.html">completed_data()</a></code> and <code><a href="../reference/varimp.html">varimp()</a></code>.</li>
@@ -90,7 +100,7 @@
 <code>pdp_range</code> is given on the scale of the data (it used to be on the <code>[-0.5, 0.5]</code> scale) and defaults to the observed range; the grid is returned as <code>pdp_grid</code>.</li>
 <li>
 <code>pdp_out</code> (<code><a href="../reference/missBART.html">missBART2()</a></code>, univariate response) has one element per kept iteration, and no longer accumulates across iterations. <code><a href="../reference/missBART.html">missBART1()</a></code> no longer returns <code>pdp_out</code>; compute the curves from <code>B_post</code>.</li>
-<li>The trees and terminal node parameters (<code>reg_trees</code>, <code>class_trees</code>, <code>reg_mu</code>, <code>class_mu</code>, <code>accepted_trees</code>) are no longer returned.</li>
+<li>The trees are returned only with <code>keep_trees = TRUE</code>, in a compact matrix format, and <code>reg_mu</code>, <code>class_mu</code> and <code>accepted_trees</code> are no longer returned.</li>
 </ul></li>
 <li>The arguments <code>true_trees_data</code>, <code>true_trees_missing</code>, <code>true_change_points</code> and <code>true_change_points_miss</code> are ignored.</li>
 <li>Dependencies on <code>CholWishart</code>, <code>extraDistr</code>, <code>TruncatedNormal</code>, <code>Matrix</code>, <code>MASS</code> and <code>ggplot2</code> were dropped; <code>Rcpp</code> and <code>RcppArmadillo</code> were added.</li>

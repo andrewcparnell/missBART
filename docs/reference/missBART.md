@@ -34,6 +34,9 @@ missBART1(
   probit_prior = probit_prior_list(),
   save_y_pred = TRUE,
   save_z = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 
@@ -60,6 +63,9 @@ missBARTprobit(
   probit_prior = probit_prior_list(),
   save_y_pred = TRUE,
   save_z = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 
@@ -87,6 +93,9 @@ missBART2(
   ymis_update = c("conditional", "marginal"),
   save_y_pred = TRUE,
   save_z = TRUE,
+  keep_trees = FALSE,
+  n_chains = 1,
+  cores = 1,
   ...
 )
 ```
@@ -205,6 +214,27 @@ missBART2(
 
   logical. Keep the draws of the latent probit variables (`z_post`)?
 
+- keep_trees:
+
+  logical. Keep the trees of every posterior sample? This is needed for
+  [predict()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
+  at new covariates,
+  [`partial_dependence()`](https://andrewcparnell.github.io/missBART/reference/partial_dependence.md)
+  and
+  [`interactions()`](https://andrewcparnell.github.io/missBART/reference/interactions.md),
+  and can take a lot of memory.
+
+- n_chains:
+
+  number of chains to run from different starting values. The samples of
+  all chains are returned together, with `chain` giving the chain of
+  each sample; see
+  [`chain_diagnostics()`](https://andrewcparnell.github.io/missBART/reference/chain_diagnostics.md).
+
+- cores:
+
+  number of chains to run in parallel (not on Windows).
+
 - ...:
 
   further arguments passed to
@@ -277,14 +307,30 @@ An object of class `"missBART"`: a list with, among others,
 
   acceptance rates of the tree proposals.
 
+- reg_trees, class_trees:
+
+  if `keep_trees = TRUE`, the regression and missingness trees of every
+  sample: a matrix with one row per node giving the tree, the row of the
+  left child (0 for a terminal node; the right child is the next row),
+  the splitting variable and value, whether missing covariate values go
+  left, and the terminal node parameters.
+
+- chain:
+
+  the chain each sample came from.
+
 Use
 [fitted()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md),
 [predict()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md),
+[plot()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md),
 [`imputed_values()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md),
 [`completed_data()`](https://andrewcparnell.github.io/missBART/reference/imputed_values.md),
-[coef()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md)
+[coef()](https://andrewcparnell.github.io/missBART/reference/missBART-methods.md),
+[`varimp()`](https://andrewcparnell.github.io/missBART/reference/varimp.md),
+[`partial_dependence()`](https://andrewcparnell.github.io/missBART/reference/partial_dependence.md),
+[`interactions()`](https://andrewcparnell.github.io/missBART/reference/interactions.md)
 and
-[`varimp()`](https://andrewcparnell.github.io/missBART/reference/varimp.md)
+[`chain_diagnostics()`](https://andrewcparnell.github.io/missBART/reference/chain_diagnostics.md)
 to summarise a fit.
 
 ## Details
