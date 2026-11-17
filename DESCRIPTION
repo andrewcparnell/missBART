@@ -1,27 +1,36 @@
 Package: missBART
 Type: Package
-Title: A multivariate extension of BART for modelling non-linear data with non-ignorable missingness in the response variable
-Version: 0.1.0
+Title: Joint Models for Non-Ignorable Missing Responses using Bayesian Additive Regression Trees
+Version: 0.2.0
 Authors@R: c(person("Yong Chen", "Goh", email="yong.goh.2022@mumail.ie", role=c("aut", "cre")),
   person("Keefe", "Murphy", email="keefe.murphy@mu.ie", role=c("aut"), comment = c(ORCID = "0000-0002-7709-3159")),
   person("Andrew", "Parnell", email="andrew.parnell@mu.ie", role=c("aut"), comment = c(ORCID = "0000-0001-7956-7939")))
-Description: Bayesian Additive Regression Trees (BART) is a non-parametric sum-of-trees model. There are three types of missing data mechanisms: Missing Completely at Random (MCAR), Missing at Random (MAR), and Missing Not at Random (MNAR). When data are MNAR, the missingness probability depends on the missing data itself. This missing data mechanism is non-ignorable, so the data and the binary missing data indicators must be jointly modelled. We decompose the joint likelihood via a selection model, which is also capable of recovering MCAR & MAR mechanisms, and present a method for jointly modelling multivariate data with missingness in the response. The data and missing data indicators follow multivariate BART and probit regression (or probit BART) models, respectively. Inference is conducted via a Gibbs sampling scheme in R, whereby the missing data is simultaneously imputed via sampling from its posterior density.
+Description: Selection models for multivariate responses with missing values
+    that may be missing not at random (MNAR). The responses follow a
+    multivariate Bayesian additive regression trees (BART) model, and the
+    missingness indicators follow either a multivariate probit regression
+    ('missBART1') or a multivariate probit BART model ('missBART2') in which
+    the responses themselves are predictors, so that missing completely at
+    random, missing at random and MNAR mechanisms can all be recovered. Missing
+    responses are imputed as part of the Markov chain Monte Carlo scheme. The
+    samplers are written in 'C++'. The methods are described in Goh, Soh,
+    Parnell and Murphy (2024) <doi:10.48550/arXiv.2412.14946>.
 License: GPL (>= 3)
 Encoding: UTF-8
-LazyData: true
-BugReports: https://github.com/yongchengoh/missBART
-Imports: 
-  Matrix, 
-  CholWishart,
-  extraDistr,
-  ggplot2,
-  MASS,
-  mice,
-  TruncatedNormal
-RoxygenNote: 7.2.3
-Suggests: 
+URL: https://github.com/yongchengoh/missBART
+BugReports: https://github.com/yongchengoh/missBART/issues
+Imports:
+    mice,
+    Rcpp,
+    stats
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
+Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.1

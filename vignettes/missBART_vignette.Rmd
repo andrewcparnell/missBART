@@ -1,120 +1,138 @@
 ---
-title: "missBART"
+title: "Getting started with missBART"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{my_vignette}
+  %\VignetteIndexEntry{Getting started with missBART}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
 ```
 
-```{r setup, echo=FALSE}
+```{r setup}
 library(missBART)
 ```
 
-## Introduction
-The package __missBART__ was created for modelling multivariate, non-linear data with non-ignorable missingness in the response. There are multiple functions within the package, such as functions for specifying hyperparameters, functions for building CART trees, functions for sampling from multivariate distributions, and the main function `missBART.probit`, which fits a multivariate BART and probit regression model to a dataset with non-ignorable response values. 
+**missBART** fits selection models to multivariate responses whose missing
+values may be *missing not at random* (MNAR): whether a value is recorded can
+depend on the value itself. The responses follow a multivariate BART model.
+The missingness indicators follow either
 
-## Sampling functions and tree functions
-The sampling functions such as `multi_rMVN()` and `matrnorm()` can be used to simulate data from a multivariate normal or matrix normal distribution. To simulate data from a sum-of-trees model, we can use `propose_tree()` to iteratively build our tree structures.
+* a multivariate probit regression on the covariates and the responses
+  (`missBART1()`), or
+* a multivariate probit BART model on the covariates and the responses
+  (`missBART2()`).
 
-## Example with simulated data
-To demonstrate the use of the different functions in the package, we will simulate a dataset from a sum-of-trees model, and subsequently generate "Missing Not at Random (MNAR)" missingness in the response using a probit model. 
+The missing responses are imputed while the model is fitted. `mvBART()` fits
+the multivariate BART model on its own to complete responses. The models are
+described in Goh, Soh, Parnell and Murphy (2024),
+[arXiv:2412.14946](https://arxiv.org/abs/2412.14946).
+
+## Simulated data
+
+We simulate two correlated responses from five covariates, and then delete
+values with a probability that increases with the value itself.
 
 ```{r}
-set.seed(123456789)
+set.seed(2024)
+n <- 400
+x <- matrix(runif(n * 5), ncol = 5)
+f <- cbind(10 * sin(pi * x[, 1] * x[, 2]) + 20 * (x[, 3] - 0.5)^2 + 10 * x[, 4] + 5 * x[, 5],
+           5 * x[, 1] - 8 * x[, 2]^2 + 3 * x[, 3])
+y_true <- f + matrix(rnorm(2 * n), ncol = 2) %*% chol(matrix(c(1, 0.6, 0.6, 1), 2))
 
-n <- 50
-p <- 2 #no. of dependent variables
-q <- 2 #no. of independent variables
-
-x <- matrix(runif(n * q, min = 0, max = 1), ncol = q)
-
-sum_mu <- matrix(0, ncol = p, nrow = n)
-trees <- 5
-ome <- matrix(c(1.7, 0.377, 0.377, 0.62), ncol=2)
-kappa <- 16 * trees
-true_trees <- vector(mode = "list", length = trees)
-for(i in seq_len(trees)) {
-  df1 <- data.frame(matrix(ncol = 8, nrow = 1))
-  colnames(df1) <- c("parent", "lower", "upper", "split_variable", "split_value", "depth", "direction", "NA_direction")
-  df1[1,] <- c(0,0,1,0,1,0,0,NA)
-  n_splits <- sample(seq_len(8), 1)
-  mu <- multi_rMVN(matrix(0, ncol=p, nrow = n_splits + 1), diag(kappa, p)) 
-
-  for(j in seq_len(n_splits)) {
-    new_tree <- propose_tree(df1, x, 20, 10, 2)
-    df1 <- new_tree$new_df
-  }
-
-  true_trees[[i]] <- df1
-  sum_mu <- sum_mu + mu[new_tree$change_points,, drop=FALSE]
-}
-
-y <- multi_rMVN(mean_mat = sum_mu, precision = ome)
-y_original <- y
-
-plot(y_original[,1], y_original[,2])
+y <- y_true
+y[runif(n) < pnorm(-1 + 1.2 * scale(y_true[, 1])), 1] <- NA
+y[runif(n) < pnorm(-1 + 1.2 * scale(y_true[, 2])), 2] <- NA
+colMeans(is.na(y))
 ```
 
-### Simulate missing values 
+The observed values are a biased sample: the missing values are larger on
+average than the observed ones.
+
 ```{r}
-include_x <- FALSE
-include_y <- TRUE
-r <- 1
-if(include_x && !include_y) {
-  r <- 1 + q
-} else if(!include_x && include_y) {
-  r <- 1 + p
-} else if(include_x && include_y) {
-  r <- 1 + p + q
-}
-corR <- diag(p)
-
-for(seed in sample(seq(1000, 100000), size = 10000)) {
-  set.seed(seed)
-  Psi_1 <- matrix(rnorm(r * r), ncol=r) + diag(5, r) #rInvWishart(1, r + 1, diag(r))[,,1]
-  B <- matrnorm(matrix(0, nrow=r, ncol=p), Psi_1, corR)
-  if(include_x && !include_y) {
-    phi <- cbind(1, x) %*% B
-  } else if(!include_x && include_y) {
-    phi <- cbind(1, y) %*% B
-  } else if(include_x && include_y) {
-    phi <- cbind(1, x, y) %*% B
-  } else {
-    phi <- matrix(B, nrow = n, ncol = p, byrow = TRUE)
-  }
-  z_mod <- multi_rMVN(phi, solve(corR))
-  m <- matrix(1, nrow=n, ncol=p)
-  m[z_mod <= 0] <- 0
-  
-  mis_prop <- colMeans(m)
-  if(all(mis_prop > 0.9) & all(mis_prop < 0.99)) break
-}
-
-y[m == 0] <- NA
-
-missing_index <- which(is.na(y))
-obs_index <- which(!is.na(y))
-
+rbind(observed = colMeans(y, na.rm = TRUE),
+      missing = c(mean(y_true[is.na(y[, 1]), 1]), mean(y_true[is.na(y[, 2]), 2])))
 ```
 
-Now that we have a dataset with MNAR missingness in the response, we can run `missBART.probit()`. 
+## missBART1: probit regression for the missingness
+
+The chains here are short so that the vignette builds quickly; use the
+defaults, or longer chains, for real analyses.
 
 ```{r}
-missBART <- missBARTprobit(x, y, burn = 100, iters = 100, 
-                           thin = 1, n_trees = 10, include_x = FALSE,
-                           include_y = TRUE, scale = FALSE, show_progress = FALSE)
+fit1 <- missBART1(x, y, n_trees = 50, burn = 500, iters = 500, thin = 1,
+                  mice_impute = FALSE, show_progress = FALSE)
+fit1
+```
 
-y_pred <- missBART$y_pred
-y_pred <- Reduce("+", y_pred)/length(y_pred)
+`imputed_values()` summarises the posterior of every missing response, and
+`completed_data()` fills in their posterior means.
 
-plot(y_pred[,1], y_original[,1])
-plot(y_pred[,2], y_original[,2])
+```{r}
+imp1 <- imputed_values(fit1)
+head(imp1)
+truth <- y_true[fit1$missing_index]
+plot(truth, imp1$mean, xlab = "True value", ylab = "Posterior mean imputation",
+     col = factor(imp1$column), pch = 19, cex = 0.6)
+abline(0, 1)
+```
+
+The probit coefficients describe the missingness mechanism. Each column refers
+to the missingness of one response, and a positive coefficient makes that
+response more likely to be *observed*. Posterior intervals for the rows `Y1`
+and `Y2` that exclude zero indicate MNAR data. (With `scale = TRUE` the
+coefficients refer to covariates and responses scaled to `[-0.5, 0.5]`.)
+
+```{r}
+round(coef(fit1), 2)
+```
+
+## missBART2: probit BART for the missingness
+
+```{r}
+fit2 <- missBART2(x, y, n_reg_trees = 50, n_class_trees = 20, burn = 500, iters = 500,
+                  thin = 1, mice_impute = FALSE, show_progress = FALSE)
+fit2
+```
+
+There are no coefficients to inspect here. Instead, `varimp()` reports how
+often each predictor is used in the splitting rules of the missingness trees.
+Splits concentrated on the responses point towards MNAR data.
+
+```{r}
+barplot(varimp(fit2), ylab = "Proportion of splitting rules")
+```
+
+## Comparison with ignoring the missingness
+
+Fitting multivariate BART to the complete cases and predicting the incomplete
+rows ignores the reason the values are missing.
+
+```{r}
+cc <- complete.cases(y)
+fit0 <- mvBART(x[cc, ], y[cc, ], x_predict = x[!cc, ], n_trees = 50, burn = 500,
+               iters = 500, thin = 1, show_progress = FALSE)
+pred0 <- matrix(NA, n, 2)
+pred0[!cc, ] <- predict(fit0)
+
+rmse <- function(a, b) sqrt(mean((a - b)^2))
+c(complete_cases = rmse(pred0[fit1$missing_index], truth),
+  missBART1 = rmse(imp1$mean, truth),
+  missBART2 = rmse(imputed_values(fit2)$mean, truth))
+```
+
+## What is in a fit
+
+A fit is a list of posterior draws, one list element per kept iteration; see
+`?missBART1` for all components. For example, `y_post` holds the BART mean
+function, `y_pred` posterior predictive draws, `y_impute` the imputed values
+(ordered as `which(is.na(y))`), `sigma_post` the residual covariance matrix
+and, if `x_predict` is supplied, `new_y_hat` and `new_y_post` the mean
+function and predictive draws for new covariates.
+
+```{r}
+round(Reduce("+", fit1$sigma_post) / length(fit1$sigma_post), 2)
 ```

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sampling_functions.R
 \name{rMVNc}
 \alias{rMVNc}
-\title{Sampling from MVN(bQ^{-1},Q^{-1})}
+\title{Sampling from a multivariate normal distribution with precision Q and mean equal to the solution of Q mu = b}
 \usage{
 rMVNc(b, Q, is_chol = FALSE)
 }
@@ -14,10 +14,10 @@ rMVNc(b, Q, is_chol = FALSE)
 \item{is_chol}{logical}
 }
 \value{
-One sample from a MVN(bQ^{-1},Q^{-1}) distribution
+One sample from that distribution
 }
 \description{
-Sampling from MVN(bQ^{-1},Q^{-1})
+Sampling from a multivariate normal distribution with precision Q and mean equal to the solution of Q mu = b
 }
 \examples{
 rMVNc(c(0,0), diag(2))

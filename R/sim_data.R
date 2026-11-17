@@ -17,7 +17,6 @@
 #' \item{q}{number of covariates (always 5)}
 #' }
 #' @export
-#' @importFrom MASS "mvrnorm"
 #'
 #' @examples
 #' # data <- sim_data_friedman(n = 1000, p = 3)
@@ -35,7 +34,7 @@ sim_data_friedman <- function(n, p = 1, scale_par = 1, omega_diag = 1, Omega = N
     Omega <- stats::rWishart(1, p + 1, diag(omega_diag, p))[,,1]
   }
   if(p > 1) {
-    err <- MASS::mvrnorm(n, mu=rep(0, ncol(Omega)), Sigma = solve(Omega))
+    err <- multi_rMVN(matrix(0, nrow = n, ncol = p), Omega)
   } else {
     err <- matrix(stats::rnorm(n, sd = 1/sqrt(Omega)), ncol = 1)
   }
@@ -149,7 +148,7 @@ sim_missing_probit <- function(x, y, include_x = FALSE, include_y = FALSE, min_m
     corR[lower.tri(corR)] <- t(corR)[lower.tri(corR)]
     psd <- all(eigen(corR, only.values=TRUE)$values >= 0)
   }
-  Psi_1 <- rInvWishart(1, r + 1, diag(r))[,,1]
+  Psi_1 <- .rwish_cpp(r + 1, diag(r), TRUE)
 
   for(seed in sample(seq(1000,100000), size = 10000)) {
     set.seed(seed)

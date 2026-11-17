@@ -2,7 +2,7 @@
 % Please edit documentation in R/sampling_functions.R
 \name{rMVN}
 \alias{rMVN}
-\title{Sampling once from a MVN(mu, Q^{-1}) distribution (Keefe)}
+\title{Sampling once from a multivariate normal distribution with mean mu and precision Q}
 \usage{
 rMVN(mu, Q)
 }
@@ -12,10 +12,10 @@ rMVN(mu, Q)
 \item{Q}{precision matrix}
 }
 \value{
-One sample from a MVN(mu, Q^{-1}) distribution
+One sample from a multivariate normal distribution with mean mu and precision Q
 }
 \description{
-Sampling once from a MVN(mu, Q^{-1}) distribution (Keefe)
+Sampling once from a multivariate normal distribution with mean mu and precision Q
 }
 \examples{
 rMVN(c(0,0), diag(2))

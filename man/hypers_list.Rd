@@ -11,6 +11,7 @@ hypers_list(
   V = NULL,
   df = 10,
   q = 0.75,
+  tau_b = 100,
   ...
 )
 }
@@ -26,6 +27,8 @@ hypers_list(
 \item{df}{hyperparameter}
 
 \item{q}{hyperparameter}
+
+\item{tau_b}{not used; kept for compatibility with earlier versions}
 
 \item{...}{Catches unused arguments}
 }

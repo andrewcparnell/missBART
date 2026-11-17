@@ -1,9 +1,9 @@
-#' Sampling once from a MVN(mu, Q^{-1}) distribution (Keefe)
+#' Sampling once from a multivariate normal distribution with mean mu and precision Q
 #'
 #' @param mu mean vector
 #' @param Q precision matrix
 #'
-#' @return One sample from a MVN(mu, Q^{-1}) distribution
+#' @return One sample from a multivariate normal distribution with mean mu and precision Q
 #' @export
 #'
 #' @examples rMVN(c(0,0), diag(2))
@@ -15,13 +15,13 @@ rMVN <- function(mu, Q) {
 
 #keefe: some versions below use this function to draw from MVN(bQ^{-1},Q^{-1}) a little faster than MVN(mu=bQ^{-1},Q^{-1})
 # note that b being a matrix is allowed as per rMVN (removes loops in update_y_miss_old_matrix!)
-#' Sampling from MVN(bQ^{-1},Q^{-1})
+#' Sampling from a multivariate normal distribution with precision Q and mean equal to the solution of Q mu = b
 #'
 #' @param b a vector
 #' @param Q precision matrix
 #' @param is_chol logical
 #'
-#' @return One sample from a MVN(bQ^{-1},Q^{-1}) distribution
+#' @return One sample from that distribution
 #' @export
 #'
 #' @examples rMVNc(c(0,0), diag(2))
