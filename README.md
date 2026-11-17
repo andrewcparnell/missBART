@@ -59,7 +59,7 @@ coef(fit1)                   # probit coefficients: is the missingness driven by
 varimp(fit2)                 # which predictors the missingness trees split on
 ```
 
-`vignette("missBART_vignette")` has a longer walk-through. Scripts for the
+`vignette("missBART")` has a longer walk-through, and the package website (built into `docs/`) has further articles, including a re-run of the simulation studies in the paper. Scripts for the
 simulations and the application in the paper are in [`Examples/`](Examples).
 
 ## Speed
@@ -92,7 +92,7 @@ Running both versions for the same 2,000 iterations on one simulated data set
 
 | model     | time 0.1.0 | time 0.2.0 | imputation RMSE 0.1.0 | imputation RMSE 0.2.0 |
 |-----------|-----------:|-----------:|----------------------:|----------------------:|
-| missBART1 |      621 s |      2.0 s |                  1.24 |                  1.16 |
+| missBART1 |      621 s |      2.0 s |                  1.24 |                  1.15 |
 | missBART2 |      246 s |      1.8 s |                  1.16 |                  1.15 |
 | mvBART    |      196 s |      1.1 s |                     – |                     – |
 

@@ -1,8 +1,8 @@
 ---
-title: "Getting started with missBART"
+title: "Quick start"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting started with missBART}
+  %\VignetteIndexEntry{Quick start}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -716,6 +716,11 @@ List missbart_cpp(const arma::mat& x, const arma::mat& y_init, const IntegerMatr
         Rm.diag().ones();
         B = gamma;
         B.each_row() /= Dv;
+        // The latent variables move with the expansion parameters: they are kept
+        // between iterations (only one Gibbs sweep is made above), so they must
+        // be mapped back to the correlation scale together with B and R.
+        Zl = W;
+        Zl.each_row() /= Dv;
       }
 
       // 6. prior precisions of the probit coefficients

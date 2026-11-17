@@ -4,3 +4,7 @@
 ^Meta$
 ^Examples$
 ^LICENSE\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^vignettes/articles$

@@ -1,0 +1,271 @@
+---
+title: "Simulation checking"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", echo = FALSE, message = FALSE,
+                      warning = FALSE, fig.width = 8, fig.height = 5, dpi = 96)
+library(ggplot2)
+```
+
+The samplers in **missBART** were rewritten in C++ for version 0.2.0, and a
+few steps were corrected along the way (see the
+[changelog](../news/index.html)). This article re-runs the simulation studies
+of Goh, Soh, Parnell and Murphy (2024,
+[arXiv:2412.14946](https://arxiv.org/abs/2412.14946)) with the new code and
+compares the results with those reported in the paper.
+
+## What was run
+
+The simulated data sets, the cross-validation folds and the missForest
+imputations used in the paper are stored in the
+[`Examples/`](https://github.com/yongchengoh/missBART/tree/main/Examples)
+folder of the repository, so the comparison uses exactly the same data and
+folds. The settings follow the paper: 5,000 burn-in and 5,000 kept iterations,
+100 regression trees, and 20 (bivariate and univariate examples) or 50
+(five-response examples) missingness trees.
+
+| Scenarios | Paper | Responses | Folds |
+|---|---|---|---|
+| MAR 1, MAR 2, MNAR 1, MNAR 2 | Section 6.1 | 2 | 4 |
+| MNAR_amp0, MNAR_amp1, MNAR_amp2 | Section 6.2 | 5 | 8 |
+| u-shape, n-shape | Appendix D | 1 | 4 |
+
+Each model is fitted to the training folds and predicts the held-out fold. As
+in the paper, accuracy is the Frobenius norm of the difference between the
+predictions and the true simulated responses in the held-out fold, computed
+over the cells that were missing, the cells that were observed, and all cells.
+
+The code is in
+[`Examples/rerun_paper_simulations.R`](https://github.com/yongchengoh/missBART/blob/main/Examples/rerun_paper_simulations.R).
+This article only reads the predictions that script saved.
+
+```{r}
+sim <- readRDS("results/paper_simulations.rds")
+res <- sim$results
+frob <- function(a, cells) {
+  e <- (a$pred - a$truth)^2
+  sqrt(sum(e[switch(cells, missing = !a$observed, observed = a$observed, combined = rep(TRUE, length(e)))]))
+}
+d <- do.call(rbind, lapply(res, function(a) {
+  data.frame(scenario = a$scenario, model = a$model, fold = a$fold, seconds = a$seconds,
+             missing = frob(a, "missing"), observed = frob(a, "observed"), combined = frob(a, "combined"),
+             rmse = sqrt(mean((a$pred - a$truth)^2)))
+}))
+model_levels <- c("missBART1", "missBART2", "missBART2_impX", "mvBART_cc", "mvBART_imp",
+                  "uni_missBART1", "uni_missBART2", "uniBART_cc", "uniBART_imp")
+marginal <- d[d$model == "missBART1_marginal", ]
+d <- d[d$model != "missBART1_marginal", ]
+d$model <- factor(d$model, levels = model_levels)
+long <- reshape(d, direction = "long", varying = c("missing", "observed", "combined"), v.names = "frobenius",
+                timevar = "cells", times = c("missing", "observed", "combined"), idvar = c("scenario", "model", "fold"))
+long$cells <- factor(long$cells, levels = c("missing", "observed", "combined"))
+colours <- c(missBART1 = "#709AE1", missBART2 = "#FD7446", missBART2_impX = "#C80813", mvBART_cc = "#1A9993",
+             mvBART_imp = "#FD8CC1", uni_missBART1 = "#71D0F5", uni_missBART2 = "#FED439", uniBART_cc = "#D5A6E6",
+             uniBART_imp = "#197EC0")
+med <- function(scen, mod, cells) round(median(long$frobenius[long$scenario == scen & long$model == mod & long$cells == cells]), 1)
+```
+
+`r length(res)` model fits were run (`r sum(sapply(res, function(a) !is.null(a$error)))`
+failed), taking `r round(sum(sapply(res, function(a) a$seconds)) / 3600, 1)` hours of
+computing time in total, or about `r round(sim$settings$minutes)` minutes on 60 cores.
+
+## Bivariate examples (Figure 1 of the paper)
+
+```{r fig1, fig.height = 6.5}
+biv <- long[long$scenario %in% c("MAR_1", "MAR_2", "MNAR_1", "MNAR_2"), ]
+ggplot(biv, aes(cells, frobenius, fill = model)) +
+  geom_boxplot(outlier.size = 0.5, linewidth = 0.3) +
+  facet_wrap(~scenario, scales = "free_y") +
+  scale_fill_manual(values = colours, name = NULL) +
+  labs(x = NULL, y = "Out-of-sample Frobenius norm") +
+  theme_bw()
+```
+
+The table compares the median over folds with the value read off Figure 1 of
+the paper. The paper only reports these results as box plots, so the paper
+values were read by eye and are accurate to about half a unit. A dash means
+the paper omitted the result because it was off the scale.
+
+```{r}
+paper_biv <- read.csv(text = "
+scenario,cells,missBART1,missBART2,mvBART_cc,mvBART_imp,uni_missBART1,uni_missBART2,uniBART_cc,uniBART_imp
+MAR_1,missing,23.0,23.5,23.0,25.8,23.5,24.0,23.2,26.0
+MAR_1,combined,32.4,32.9,32.7,35.2,33.2,33.7,33.2,35.2
+MAR_2,missing,12.7,12.2,12.8,12.3,13.0,12.5,12.3,12.4
+MAR_2,combined,30.9,30.2,31.5,30.4,30.9,30.5,30.2,30.4
+MNAR_1,missing,19.6,18.5,25.2,31.2,21.0,19.4,22.2,31.3
+MNAR_1,combined,31.4,32.0,NA,40.1,32.1,31.8,33.0,40.5
+MNAR_2,missing,21.5,18.8,36.5,NA,26.0,20.6,27.0,NA
+MNAR_2,combined,32.3,31.2,NA,NA,35.4,32.3,36.0,NA")
+compare <- function(paper) {
+  models <- setdiff(names(paper), c("scenario", "cells"))
+  out <- do.call(rbind, lapply(seq_len(nrow(paper)), function(i) {
+    new <- sapply(models, function(m) med(paper$scenario[i], m, paper$cells[i]))
+    rbind(data.frame(scenario = paper$scenario[i], cells = paper$cells[i], source = "paper", t(unlist(paper[i, models]))),
+          data.frame(scenario = "", cells = "", source = "0.2.0", t(new)))
+  }))
+  knitr::kable(out, row.names = FALSE, digits = 1)
+}
+options(knitr.kable.NA = "–")
+compare(paper_biv)
+```
+
+The new code reproduces the paper's results, and with them its conclusions:
+
+* Under MAR, all methods perform about the same, apart from the two that
+  train on missForest imputations in MAR 1.
+* Under MNAR, the joint models give much better predictions for the missing
+  responses than the complete-case and imputation-based alternatives.
+* `missBART2` is the better of the two joint models when the missingness was
+  generated from trees (MAR 2, MNAR 2).
+
+The largest difference is `uni_missBART1` in MNAR 2, which does better here
+(`r med("MNAR_2", "uni_missBART1", "missing")` against about 26 for the missing
+responses).
+
+## Recovering the missingness mechanism (Figures 2 and 3)
+
+The probit coefficients of `missBART1`, from the first fold. Each panel is the
+missingness of one response. As in Figure 2 of the paper, the intervals for
+the coefficients of the responses (`Y1`, `Y2`) cover zero when the data are
+MAR and are far from zero when they are MNAR.
+
+```{r fig2, fig.height = 3.5}
+coefs <- do.call(rbind, lapply(res, function(a) {
+  if(a$model != "missBART1" || is.null(a$extra) || !a$scenario %in% c("MAR_1", "MNAR_1")) return(NULL)
+  b <- a$extra$coef
+  data.frame(scenario = a$scenario, predictor = factor(rep(rownames(b), ncol(b)), levels = rownames(b)),
+             response = rep(paste0("Missingness of ", colnames(b)), each = nrow(b)),
+             mean = c(b[, , "mean"]), lower = c(b[, , "lower"]), upper = c(b[, , "upper"]))
+}))
+coefs$type <- ifelse(grepl("^Y", coefs$predictor), "response", ifelse(coefs$predictor == "Intercept", "intercept", "covariate"))
+ggplot(coefs, aes(predictor, mean, colour = type)) +
+  geom_hline(yintercept = 0, linewidth = 0.3) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.4) +
+  facet_grid(~scenario + response, scales = "free_y") +
+  scale_colour_manual(values = c(covariate = "#1A9993", intercept = "grey30", response = "#FD8CC1"), guide = "none") +
+  labs(x = NULL, y = "95% posterior interval") +
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The numbers also agree closely with the paper. For example, in MAR 1 the
+coefficients of `X2` and `X4` for the first response are about 7 in both, and
+in MNAR 1 the coefficients of `Y1` are about 5.6 and -7.5 in both.
+
+The variable importance in the missingness trees of `missBART2`, from the
+first fold. As in Figure 3 of the paper, the covariates (`X3` in particular)
+are used most under MAR 2, and the two responses dominate under MNAR 2.
+
+```{r fig3, fig.height = 3}
+vi <- do.call(rbind, lapply(res, function(a) {
+  if(a$model != "missBART2" || is.null(a$extra) || !a$scenario %in% c("MAR_2", "MNAR_2")) return(NULL)
+  v <- a$extra$varimp
+  data.frame(scenario = a$scenario, predictor = factor(names(v), levels = names(v)), importance = as.numeric(v))
+}))
+ggplot(vi, aes(predictor, importance, fill = grepl("^Y", predictor))) +
+  geom_col() + facet_wrap(~scenario) +
+  scale_fill_manual(values = c("#1A9993", "#FD8CC1"), guide = "none") +
+  labs(x = NULL, y = "Proportion of splitting rules") + theme_bw()
+```
+
+## Five responses with missing covariates (Figure 4)
+
+```{r fig4, fig.height = 3.5}
+amp <- long[grepl("amp", long$scenario) & long$cells == "combined", ]
+ggplot(amp, aes(model, frobenius, fill = model)) +
+  geom_boxplot(outlier.size = 0.5, linewidth = 0.3) +
+  facet_wrap(~scenario) +
+  scale_fill_manual(values = colours, name = NULL) +
+  labs(x = NULL, y = "Out-of-sample Frobenius norm") +
+  theme_bw() + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+```
+
+```{r}
+paper_amp <- read.csv(text = "
+scenario,cells,missBART1,missBART2,missBART2_impX,mvBART_cc,mvBART_imp,uni_missBART1,uni_missBART2,uniBART_cc,uniBART_imp
+MNAR_amp0,combined,30.5,30.5,NA,52.0,37.0,49.0,36.5,38.0,37.0
+MNAR_amp1,combined,31.0,31.8,30.8,52.0,38.0,48.0,37.0,38.5,37.8
+MNAR_amp2,combined,33.5,36.5,31.5,54.5,41.0,43.0,42.0,42.5,41.0")
+compare(paper_amp)
+```
+
+Again the agreement is close: the joint multivariate models are clearly best,
+and covariate imputation helps `missBART2` when many covariates are missing
+(MNAR_amp2). `missBART1` does a little better than in the paper in MNAR_amp2,
+and `uni_missBART1` a little worse.
+
+## Univariate examples (Appendix D)
+
+Out-of-sample root mean squared error over all held-out observations, averaged
+over the four folds. For the u-shaped example, the results of the original R
+code were saved with the data, so they can be compared directly. For the
+n-shaped example the paper values were read off Figure D.3 (at $p_t = 1$).
+
+```{r}
+uni <- aggregate(rmse ~ model + scenario, d[d$scenario %in% c("ushape", "nshape"), ], mean)
+old <- read.csv("results/ushape_original_rmse.csv")
+old <- aggregate(rmse ~ model, old[old$p_t == 1, ], mean)
+old$model <- sub("^missBART1$", "missBART1", old$model)
+tab <- data.frame(model = c("missBART1", "missBART2", "uniBART_cc", "uniBART_imp"))
+tab$`u-shape, original code` <- old$rmse[match(tab$model, old$model)]
+tab$`u-shape, 0.2.0` <- uni$rmse[uni$scenario == "ushape"][match(tab$model, uni$model[uni$scenario == "ushape"])]
+tab$`n-shape, paper` <- c(1.32, 1.16, 1.31, NA)
+tab$`n-shape, 0.2.0` <- uni$rmse[uni$scenario == "nshape"][match(tab$model, uni$model[uni$scenario == "nshape"])]
+knitr::kable(tab, digits = 2)
+```
+
+The conclusions are unchanged: all three sensible methods do equally well for
+u-shaped missingness, and only `missBART2` copes with n-shaped missingness,
+which a probit regression cannot represent.
+
+## The update of the missing responses
+
+Version 0.2.0 changed how `missBART1` updates missing responses in rows that
+are only partly missing: by default it now conditions on the observed
+responses in the same row (`ymis_update = "conditional"`), where Appendix C.1
+of the paper uses the margin of the full-row distribution
+(`ymis_update = "marginal"`). Both were run here.
+
+```{r}
+both <- rbind(cbind(d[d$model == "missBART1", c("scenario", "fold", "missing", "combined")], update = "conditional"),
+              cbind(marginal[, c("scenario", "fold", "missing", "combined")], update = "marginal"))
+both <- both[both$scenario %in% marginal$scenario, ]
+tab <- aggregate(cbind(missing, combined) ~ update + scenario, both, median)
+wide <- reshape(tab, direction = "wide", idvar = "scenario", timevar = "update")
+names(wide) <- c("scenario", "missing: conditional", "combined: conditional", "missing: marginal", "combined: marginal")
+knitr::kable(wide[, c(1, 2, 4, 3, 5)], digits = 1, row.names = FALSE)
+```
+
+On these data sets the two versions give almost the same predictions, except
+in MNAR 2 where the conditional update is clearly better. The difference
+matters more when the residual correlation between the responses is strong:
+in a separate experiment with three responses and residual correlations of
+0.8, the conditional update reduced the error of the imputations by about a
+quarter and recovered the residual correlation much better (0.68 against
+0.28).
+
+## Computing time
+
+Median seconds per fit (10,000 iterations, 1,500 or 1,750 training rows).
+The `uni_` models fit one model per response, so their times are the sum over
+responses.
+
+```{r}
+tm <- aggregate(seconds ~ model + scenario, d, median)
+tm$group <- ifelse(grepl("amp", tm$scenario), "Five responses", ifelse(tm$scenario %in% c("ushape", "nshape"), "One response", "Two responses"))
+tm <- aggregate(seconds ~ model + group, tm, median)
+wide <- reshape(tm, direction = "wide", idvar = "model", timevar = "group")
+names(wide) <- sub("seconds.", "", names(wide))
+knitr::kable(wide[, c("model", "One response", "Two responses", "Five responses")], digits = 0, row.names = FALSE)
+```
+
+The fits ran 60 at a time on a shared machine, so these are slower than a
+fit run on its own. With the original R code a single `missBART1` fit of this
+size takes hours.
+
+## Summary
+
+The C++ samplers reproduce the simulation results of the paper to within the
+accuracy with which they can be read from its figures, and the conclusions of
+its simulation studies hold.

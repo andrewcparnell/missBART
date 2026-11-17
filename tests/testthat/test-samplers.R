@@ -141,3 +141,25 @@ test_that("simulation helpers run", {
   miss2 <- sim_missing_trees(data$x, data$y, min_missing_prop = 0.2, max_missing_prop = 0.98)
   expect_equal(dim(miss2$m), c(200, 2))
 })
+
+test_that("the multivariate probit regression recovers known coefficients and correlation", {
+  skip_on_cran()
+  set.seed(11)
+  n <- 1500
+  x <- matrix(runif(n * 2), ncol = 2)
+  B <- rbind(c(0.3, -0.2), c(1.5, 0), c(0, -2))          # on x scaled to [-0.5, 0.5]
+  R <- matrix(c(1, 0.6, 0.6, 1), 2)
+  xs <- sweep(sweep(x, 2, apply(x, 2, min)), 2, apply(x, 2, max) - apply(x, 2, min), "/") - 0.5
+  z <- cbind(1, xs) %*% B + matrix(rnorm(2 * n), ncol = 2) %*% chol(R)
+  y <- cbind(x[, 1], x[, 2]) + matrix(rnorm(2 * n, sd = 0.1), ncol = 2)
+  y[z <= 0] <- NA
+  # the responses are not predictors here, so the probit part is an ordinary multivariate probit regression
+  fit <- missBART1(x, y, n_trees = 10, burn = 1000, iters = 2000, thin = 1, include_y = FALSE,
+                   mice_impute = FALSE, show_progress = FALSE, save_y_pred = FALSE, save_z = FALSE)
+  est <- coef(fit)
+  expect_true(all(B > est[, , "lower"] - 0.1 & B < est[, , "upper"] + 0.1))
+  expect_equal(unname(est[, , "mean"]), B, tolerance = 0.25)
+  r12 <- sapply(fit$R_post, function(a) a[1, 2])
+  expect_equal(mean(r12), 0.6, tolerance = 0.15)
+  expect_true(all(is.finite(unlist(fit$y_impute))))
+})

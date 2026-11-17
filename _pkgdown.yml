@@ -1,0 +1,43 @@
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+navbar:
+  structure:
+    left: [intro, articles, reference, news]
+    right: [search, github]
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - articles/simulation-checking
+
+reference:
+- title: Models
+  desc: Fit the joint models, or multivariate BART on its own.
+  contents:
+  - missBART
+  - mvBART
+- title: Summarising a fit
+  contents:
+  - missBART-methods
+  - imputed_values
+  - varimp
+- title: Priors and settings
+  contents:
+  - hypers_list
+  - tree_list
+  - probit_prior_list
+- title: Simulating data
+  contents:
+  - starts_with("sim_")
+  - propose_tree
+- title: Utilities
+  contents:
+  - scale_bart
+  - rMVN
+  - rMVNc
+  - multi_rMVN
+  - matrnorm
+  - missBART-package

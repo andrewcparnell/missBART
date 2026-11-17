@@ -76,5 +76,8 @@ These change the results relative to version 0.1.0.
   and `true_change_points_miss` are ignored.
 * Dependencies on `CholWishart`, `extraDistr`, `TruncatedNormal`, `Matrix`,
   `MASS` and `ggplot2` were dropped; `Rcpp` and `RcppArmadillo` were added.
+* The package has a pkgdown website (built into `docs/`) with a quick start
+  vignette and further articles, including a re-run of the simulation studies
+  in the paper.
 * The unexported plotting helpers `plot_posterior()` and
   `plot_plant_posterior()` were removed.
